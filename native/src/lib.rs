@@ -2,12 +2,14 @@ extern crate neon;
 extern crate imageflow_core;
 
 use neon::prelude::*;
-use imageflow_core::{FlowError, JsonResponse};
-use humansize::file_size_opts::Kilo::Binary;
 
 fn get_long_version_string(mut cx: FunctionContext) -> JsResult<JsString> {
     Ok(cx.string(imageflow_types::version::one_line_version()))
 }
+
+// pub fn buf_copy_from_slice(data: &[u8], buf: &mut Handle<JsBuffer>) {
+//     buf.grab(|mut contents| { contents.as_mut_slice().copy_from_slice(data) });
+// }
 
 pub struct ContextWrapper{
     inner: Box<imageflow_core::Context>
@@ -27,7 +29,7 @@ impl ContextWrapper{
             Err(e) => panic!(e)
         }
     }
-    fn add_output_buffer(&mut self, io_id: i32){
+    fn add_output_buffer_panic(&mut self, io_id: i32){
         match self.inner.add_output_buffer(io_id){
             Ok(_) => {},
             Err(e) => panic!(e)
@@ -42,13 +44,6 @@ impl ContextWrapper{
     }
 
 
-
-    fn get_image_info(&mut self, io_id: i32) -> imageflow_types::ImageInfo{
-        match self.inner.get_image_info(io_id){
-            Ok(info) => info,
-            Err(e) => panic!(e)
-        }
-    }
 
     fn message(&mut self, method: String, message: String) -> String{
         let (response, _result) =  self.inner.message(&method, message.as_bytes());
@@ -94,27 +89,23 @@ declare_types! {
         {
             let guard = cx.lock();
             let mut job = this.borrow_mut(&guard);
-            job.add_output_buffer(io_id)
+            job.add_output_buffer_panic(io_id)
         }
         Ok(cx.undefined().upcast())
     }
     // method getOutputBufferBytes(mut cx){
     //     let mut this = cx.this();
-    //     {
+    //     let io_id: i32 = cx.argument::<JsNumber>(0)?.value() as i32;
+    //     let buffer = {
     //         let guard = cx.lock();
     //         let mut job = this.borrow_mut(&guard);
-    //         ContextWrapper::get_output_buffer_bytes(cx, job)
-    //     }
-    //     // let buffer = cx.array_buffer(bytes.len() as u32)?;
-    //     // {
-    //     //     let guard = cx.lock();
-    //     //     let mut buffer_slice = (*buffer.borrow_mut(&guard)).as_mut_slice();
-    //     //     for (ix, v) in bytes.iter().enumerate(){
-    //     //         buffer_slice[ix] = v;
-    //     //     }
-    //     // }
-    //     //
-    //     // Ok(buffer.upcast())
+    //         let bytes = job.get_output_buffer_bytes_panic(io_id);
+    //         let buffer = cx.array_buffer(bytes.len() as u32)?;
+    //         buf_copy_from_slice(bytes, buffer);
+    //         buffer
+    //     };
+    //
+    //     Ok(buffer.upcast())
     // }
 
     method message(mut cx){
@@ -129,21 +120,7 @@ declare_types! {
         Ok(cx.string(response).upcast())
     }
 
-    method get(mut cx) {
-      let attr: String = cx.argument::<JsString>(0)?.value();
-      let this = cx.this();
-      match &attr[..] {
-        "id" => {
-          let id = {
-            let guard = cx.lock();
-            let user = this.borrow(&guard);
-            3
-          };
-          Ok(cx.number(id).upcast())
-        },
-        _ => cx.throw_type_error("property does not exist")
-      }
-    }
+
     method panic(_) {
       panic!("JobContext.prototype.panic")
     }
