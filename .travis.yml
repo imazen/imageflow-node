@@ -1,0 +1,40 @@
+matrix:
+  allow_failures:
+    - os: windows
+
+os:
+  - osx
+  - linux
+  - windows
+
+language: node_js
+
+node_js:
+  - node
+
+cache:
+  - yarn: true
+  - cargo: true
+
+before_install:
+  # Install Rust and Cargo
+  - |
+    if [ "$TRAVIS_OS_NAME" == "windows" ]; then
+      choco install rust
+    else
+      curl https://sh.rustup.rs -sSf > /tmp/rustup.sh && /
+      sh /tmp/rustup.sh -y && /
+      export PATH="$HOME/.cargo/bin:$PATH" && /
+      source "$HOME/.cargo/env"
+    fi
+  # Install global NPM packages
+  - node -v
+  - npm -v
+  - yarn global add yarn@latest
+  - yarn
+
+script:
+  - yarn test
+  # Publish when using '[publish binary]' keywords
+  - COMMIT_MESSAGE=$(git log --format=%B --no-merges -n 1 | tr -d '\n')
+  - if [[ ${COMMIT_MESSAGE} =~ "[publish binary]" ]]; then yarn upload-binary || exit 0; fi;
