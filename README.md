@@ -1,4 +1,4 @@
-# disk-utility
+# Node bindings for [Imageflow](https://github.com/imazen/imageflow)
 
 [![Build Status](https://travis-ci.org/imazen/imageflow-node.svg?branch=master)](https://travis-ci.org/imazen/imageflow-node)
 
