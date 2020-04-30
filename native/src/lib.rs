@@ -3,10 +3,6 @@
 
 // use neon::prelude::*;
 
-// fn get_long_version_string(mut cx: FunctionContext) -> JsResult<JsString> {
-//     Ok(cx.string(imageflow_types::version::one_line_version()))
-// }
-
 // // pub fn buf_copy_from_slice(data: &[u8], buf: &mut Handle<JsBuffer>) {
 // //     buf.grab(|mut contents| { contents.as_mut_slice().copy_from_slice(data) });
 // // }
@@ -16,12 +12,12 @@
 // }
 // impl ContextWrapper{
 //     fn new() -> ContextWrapper{
-        // match imageflow_core::Context::create_can_panic(){
-        //     Ok(v) => ContextWrapper{
-        //         inner: v
-        //     },
-        //     Err(e) => panic!(e)
-        // }
+// match imageflow_core::Context::create_can_panic(){
+//     Ok(v) => ContextWrapper{
+//         inner: v
+//     },
+//     Err(e) => panic!(e)
+// }
 //     }
 //     fn add_input_bytes_copied_panic(&mut self, io_id: i32, bytes: &[u8]){
 //         match self.inner.add_copied_input_buffer(io_id, bytes){
@@ -130,12 +126,20 @@
 // });
 
 use nodejs_sys::{
-    napi_callback_info, napi_create_external_arraybuffer, napi_create_string_utf8,
-    napi_define_class, napi_env, napi_get_cb_info, napi_get_undefined, napi_get_value_int32,
-    napi_property_attributes, napi_property_descriptor, napi_ref, napi_set_property, napi_unwrap,
-    napi_value, napi_wrap,
+    napi_adjust_external_memory, napi_callback_info, napi_create_external_arraybuffer,
+    napi_create_string_utf8, napi_define_class, napi_env, napi_get_cb_info, napi_get_undefined,
+    napi_get_value_int32, napi_property_attributes, napi_property_descriptor, napi_ref,
+    napi_set_property, napi_unwrap, napi_value, napi_wrap,
 };
 use std::ffi::{c_void, CString};
+
+pub unsafe extern "C" fn get_long_version_string(
+    env: napi_env,
+    info: napi_callback_info,
+) -> napi_value {
+    let _ = imageflow_types::version::one_line_version();
+    unimplemented!()
+}
 
 pub unsafe extern "C" fn add_input_bytes_copied(
     _env: napi_env,
@@ -186,15 +190,16 @@ pub unsafe extern "C" fn get_output_buffer_bytes(
         Some(v) => {
             match v.get_output_buffer_slice(read) {
                 Ok(v) => {
-                    let s = napi_create_external_arraybuffer(
+                    napi_create_external_arraybuffer(
                         env,
                         v.as_ptr() as *mut c_void,
                         v.len(),
-                        None,
-                        std::ptr::null_mut(),
+                        Some(handle_buffer_drop),
+                        Box::into_raw(Box::new(v.len())) as *mut c_void,
                         &mut local,
                     );
-                    println!("{:?}", s);
+                    napi_adjust_external_memory(env, v.len() as i64, std::ptr::null_mut());
+                    std::mem::forget(v);
                 }
                 Err(err) => {
                     println!("{}", err);
@@ -243,9 +248,9 @@ pub unsafe extern "C" fn create_class(env: napi_env, info: napi_callback_info) -
         &mut local,
         std::ptr::null_mut(),
     );
-    let v=match imageflow_core::Context::create_can_panic(){
-        Ok(v) =>  v,
-        Err(e) => panic!(e)
+    let v = match imageflow_core::Context::create_can_panic() {
+        Ok(v) => v,
+        Err(e) => panic!(e),
     };
     let inner = Context { inner: Some(v) };
     let re = Box::into_raw(Box::new(inner));
@@ -273,6 +278,16 @@ use imageflow_core;
 
 pub struct Context {
     pub inner: Option<Box<imageflow_core::Context>>,
+}
+
+pub unsafe extern "C" fn handle_buffer_drop(
+    env: napi_env,
+    finalize_data: *mut c_void,
+    finalize_hint: *mut c_void,
+) {
+    let len:Box<i64>=Box::from_raw(finalize_hint as *mut i64);
+    let v=Vec::from_raw_parts(finalize_data as *mut u8 , *len.as_ref() as usize, *len.as_ref() as usize)
+    napi_adjust_external_memory(env,-1*len.as_ref(),std::ptr::null_mut());
 }
 
 #[no_mangle]
