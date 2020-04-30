@@ -310,14 +310,13 @@ pub unsafe extern "C" fn create_class(env: napi_env, info: napi_callback_info) -
     };
     let inner = Context { inner: Some(v) };
     let re = Box::into_raw(Box::new(inner));
-    let mut new_local: napi_ref = std::mem::zeroed();
     napi_wrap(
         env,
         local,
         re as *mut c_void,
         Some(drop_native),
         std::ptr::null_mut(),
-        &mut new_local,
+        std::ptr::null_mut(),
     );
     local
 }
@@ -327,7 +326,7 @@ pub unsafe extern "C" fn drop_native(
     finalize_data: *mut c_void,
     _finalize_hint: *mut c_void,
 ) {
-    // Box::from_raw(finalize_data);
+    Box::from_raw(finalize_data);
 }
 
 use imageflow_core;
