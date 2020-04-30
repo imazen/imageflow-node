@@ -66,7 +66,7 @@ pub unsafe extern "C" fn add_input_bytes(env: napi_env, info: napi_callback_info
     let vec_data = Vec::from_raw_parts(array_buffer as *mut u8, len, len);
     match &mut task.inner {
         Some(v) => {
-            match v.add_input_bytes(read, vec_data.as_slice()) {
+            match v.add_copied_input_buffer(read, vec_data.as_slice()) {
                 Ok(_) => (),
                 Err(err) => {
                     println!("{}", err);
@@ -75,6 +75,7 @@ pub unsafe extern "C" fn add_input_bytes(env: napi_env, info: napi_callback_info
         }
         None => (),
     };
+    std::mem::forget(vec_data);
     Box::into_raw(task);
     local
 }
@@ -220,6 +221,7 @@ pub unsafe extern "C" fn complete_task(env: napi_env, _status: napi_status, data
         }
     };
     let mut response: napi_value = std::mem::zeroed();
+    Box::into_raw(task.context);
     create_string(env, &v, &mut response);
     napi_resolve_deferred(env, task.deferred, response);
     napi_delete_async_work(env, task.work);
@@ -347,7 +349,8 @@ pub unsafe extern "C" fn handle_buffer_drop(
         *len.as_ref() as usize,
         *len.as_ref() as usize,
     );
-    napi_adjust_external_memory(env, -1 * len.as_ref(), std::ptr::null_mut());
+    let len = *len.as_ref();
+    napi_adjust_external_memory(env, -1 * len, std::ptr::null_mut());
 }
 
 #[no_mangle]
@@ -431,7 +434,7 @@ pub unsafe extern "C" fn napi_register_module_v1(
         &mut local,
     );
     let mut get_long_version: napi_value = std::mem::zeroed();
-    let get_long_version_name = CString::new("getLongVersionName").expect("CString::new failed");
+    let get_long_version_name = CString::new("getLongVersionString").expect("CString::new failed");
     napi_create_function(
         env,
         get_long_version_name.as_ptr(),
@@ -441,7 +444,7 @@ pub unsafe extern "C" fn napi_register_module_v1(
         &mut get_long_version,
     );
     let mut get_long_version_key: napi_value = std::mem::zeroed();
-    create_string(env, "getLongVersionName", &mut get_long_version_key);
+    create_string(env, "getLongVersionString", &mut get_long_version_key);
     napi_set_property(env, m, key, local);
     napi_set_property(env, m, get_long_version_key, get_long_version);
     m
