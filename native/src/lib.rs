@@ -76,7 +76,7 @@ pub unsafe extern "C" fn add_input_bytes(env: napi_env, info: napi_callback_info
         None => (),
     };
     std::mem::forget(vec_data);
-    Box::into_raw(task);
+    std::mem::forget(task);
     local
 }
 pub unsafe extern "C" fn add_output_buffer(env: napi_env, info: napi_callback_info) -> napi_value {
@@ -167,26 +167,19 @@ struct MessageTask {
     message: String,
     method: String,
     result: Option<Result<String, String>>,
-    context: Box<Context>,
+    context: Box<imageflow_core::Context>,
     work: napi_async_work,
     deferred: napi_deferred,
 }
 
 pub unsafe extern "C" fn perform_task(_env: napi_env, data: *mut c_void) {
     let mut task: Box<MessageTask> = Box::from_raw(std::mem::transmute(data));
-    match &mut task.context.inner {
-        Some(v) => {
-            let (response, _result) = v.message(&task.method, task.message.as_bytes());
-            match std::str::from_utf8(&response.response_json.to_vec()) {
-                Ok(string_response) => {
-                    task.result = Some(Ok(string_response.to_owned()));
-                }
-                Err(err) => task.result = Some(Err(err.to_string())),
-            };
+    let (response, _result) = task.context.message(&task.method, task.message.as_bytes());
+    match std::str::from_utf8(&response.response_json.to_vec()) {
+        Ok(string_response) => {
+            task.result = Some(Ok(string_response.to_owned()));
         }
-        None => {
-            task.result = Some(Err("Context not found".to_owned()));
-        }
+        Err(err) => task.result = Some(Err(err.to_string())),
     };
     Box::into_raw(task);
 }
@@ -221,7 +214,6 @@ pub unsafe extern "C" fn complete_task(env: napi_env, _status: napi_status, data
         }
     };
     let mut response: napi_value = std::mem::zeroed();
-    Box::into_raw(task.context);
     create_string(env, &v, &mut response);
     napi_resolve_deferred(env, task.deferred, response);
     napi_delete_async_work(env, task.work);
@@ -248,13 +240,19 @@ pub unsafe extern "C" fn message(env: napi_env, info: napi_callback_info) -> nap
     );
     let mut val = std::mem::zeroed();
     napi_unwrap(env, js_this, &mut val);
-    let task: Box<Context> = Box::from_raw(std::mem::transmute(val));
+    let mut task: Box<Context> = Box::from_raw(std::mem::transmute(val));
     let method = get_string(env, args_buffer[0]);
     let message = get_string(env, args_buffer[1]);
+    let context = match task.inner {
+        Some(ctx) => ctx,
+        None => panic!("error"),
+    };
+    task.inner = None;
+    std::mem::forget(task);
     let message_task = MessageTask {
         message,
         method,
-        context: task,
+        context,
         result: None,
         work,
         deferred,
@@ -329,7 +327,7 @@ pub unsafe extern "C" fn drop_native(
     finalize_data: *mut c_void,
     _finalize_hint: *mut c_void,
 ) {
-    Box::from_raw(finalize_data);
+    // Box::from_raw(finalize_data);
 }
 
 use imageflow_core;
