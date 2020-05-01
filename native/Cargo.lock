@@ -1174,6 +1174,7 @@ dependencies = [
  "imageflow_types",
  "nodejs-sys",
  "num_cpus",
+ "threadpool",
 ]
 
 [[package]]
