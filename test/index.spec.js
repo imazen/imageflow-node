@@ -69,11 +69,11 @@ describe('basic', () => {
     expect(result.data.job_result.encodes[0].h).toEqual(100);
 
     let result_bytes = job.getOutputBufferBytes(1);
-    console.log(result_bytes);
-    expect(result_bytes.length).toBeGreaterThan(100);
-    expect(result_bytes[0]).toEqual(0xFF);
-    expect(result_bytes[1]).toEqual(0xD8);
-    expect(result_bytes[2]).toEqual(0xFF);
+    result = new Uint8Array(result_bytes);
+    expect(result_bytes.byteLength).toBeGreaterThan(100);
+    expect(result[0]).toEqual(0xFF);
+    expect(result[1]).toEqual(0xD8);
+    expect(result[2]).toEqual(0xFF);
 
   });
 
