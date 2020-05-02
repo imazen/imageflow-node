@@ -69,7 +69,7 @@ macro_rules! handle_context_error {
             nodejs_sys::napi_get_undefined($env, &mut undefined),
             nodejs_sys::napi_status::napi_ok
         );
-        undefined
+        return undefined;
     }};
 }
 
@@ -215,8 +215,7 @@ pub unsafe extern "C" fn add_input_bytes(env: napi_env, info: napi_callback_info
         })) {
             Ok(Ok(_)) => {}
             Ok(Err(err)) => {
-                let undefined = handle_context_error!(env, inner, err);
-                return undefined;
+                handle_context_error!(env, inner, err);
             }
             Err(panic) => {
                 handle_context_panic!(env, inner, panic);
@@ -259,8 +258,7 @@ pub unsafe extern "C" fn add_output_buffer(env: napi_env, info: napi_callback_in
         match catch_unwind(AssertUnwindSafe(|| inner.add_output_buffer(read))) {
             Ok(Ok(_)) => (),
             Ok(Err(err)) => {
-                let undefined = handle_context_error!(env, inner, err);
-                return undefined;
+                handle_context_error!(env, inner, err);
             }
             Err(panic) => {
                 handle_context_panic!(env, inner, panic);
@@ -324,8 +322,7 @@ pub unsafe extern "C" fn get_output_buffer_bytes(
                 std::mem::forget(data);
             }
             Ok(Err(err)) => {
-                let undefined = handle_context_error!(env, inner, err);
-                return undefined;
+                handle_context_error!(env, inner, err);
             }
             Err(panic) => {
                 handle_context_panic!(env, inner, panic);
@@ -370,8 +367,7 @@ pub unsafe extern "C" fn message_sync(env: napi_env, info: napi_callback_info) -
         match result {
             Ok(_) => (),
             Err(err) => {
-                let undefined = handle_context_error!(env, inner, err);
-                return undefined;
+                handle_context_error!(env, inner, err);
             }
         }
         let re = match std::str::from_utf8(&response.response_json.to_vec()) {
@@ -395,26 +391,41 @@ pub unsafe extern "C" fn task_compelete(
     ctx: *mut c_void,
     data: *mut c_void,
 ) {
-    let value: Box<Result<String, String>> =
-        Box::from_raw(std::mem::transmute(Box::from_raw(data)));
-    match value.as_ref() {
-        Ok(s) => {
-            let mut result: napi_value = std::mem::zeroed();
-            assert_eq!(create_string(env, &s, &mut result), napi_status::napi_ok);
-            assert_eq!(
-                napi_resolve_deferred(env, ctx as napi_deferred, result),
-                napi_status::napi_ok
-            );
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let value: Box<Result<String, String>> =
+            Box::from_raw(std::mem::transmute(Box::from_raw(data)));
+        match value.as_ref() {
+            Ok(s) => {
+                let mut result: napi_value = std::mem::zeroed();
+                assert_eq!(create_string(env, &s, &mut result), napi_status::napi_ok);
+                assert_eq!(
+                    napi_resolve_deferred(env, ctx as napi_deferred, result),
+                    napi_status::napi_ok
+                );
+            }
+            Err(e) => {
+                let js_error = create_error(env, "INTERNAL_ERROR", &e);
+                assert_eq!(
+                    napi_reject_deferred(env, ctx as napi_deferred, js_error),
+                    napi_status::napi_ok
+                );
+            }
+        };
+    }));
+    match result {
+        Ok(_) => (),
+        Err(panic) => {
+            let msg = if let Some(string) = panic.downcast_ref::<String>() {
+                format!("internal error in module: {}", string)
+            } else if let Some(str) = panic.downcast_ref::<&str>() {
+                format!("internal error in module: {}", str)
+            } else {
+                "internal error in  module".to_string()
+            };
+            let js_error = create_error(env, "INTERNAL_ERROR", &msg);
+            napi_reject_deferred(env, ctx as napi_deferred, js_error);
         }
-        Err(e) => {
-            let mut result: napi_value = std::mem::zeroed();
-            assert_eq!(create_string(env, &e, &mut result), napi_status::napi_ok);
-            assert_eq!(
-                napi_reject_deferred(env, ctx as napi_deferred, result),
-                napi_status::napi_ok
-            );
-        }
-    };
+    }
 }
 
 pub unsafe extern "C" fn message(env: napi_env, info: napi_callback_info) -> napi_value {
@@ -548,15 +559,15 @@ pub unsafe extern "C" fn message(env: napi_env, info: napi_callback_info) -> nap
                         ),
                         napi_status::napi_ok
                     );
+                    assert_eq!(
+                        napi_release_threadsafe_function(
+                            thread_safe.0,
+                            napi_threadsafe_function_release_mode::napi_tsfn_release,
+                        ),
+                        napi_status::napi_ok,
+                    );
                 }
             }
-            assert_eq!(
-                napi_release_threadsafe_function(
-                    thread_safe.0,
-                    napi_threadsafe_function_release_mode::napi_tsfn_release,
-                ),
-                napi_status::napi_ok,
-            );
         });
         promise
     });
@@ -648,8 +659,6 @@ pub unsafe extern "C" fn drop_native(
 ) {
     Box::from_raw(finalize_data);
 }
-
-use imageflow_core;
 
 pub struct Context {
     pub inner: Mutex<Box<imageflow_core::Context>>,
