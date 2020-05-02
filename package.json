@@ -22,13 +22,13 @@
     "node-pre-gyp-github": "^1.4.3"
   },
   "scripts": {
-    "build": "neon build",
-    "build-release": "neon build --release",
+    "build": "cd ./native && cargo build && mv ./target/debug/libimageflow_node.so ./index.node",
+    "build-release": "cd ./native && cargo build --release && mv ./target/release/libimageflow_node.so ./index.node",
     "install": "node-pre-gyp install --fallback-to-build=false || neon build",
     "lint": "eslint .",
     "package": "node-pre-gyp package",
     "spec": "jest",
-    "test": "yarn build && yarn spec",
+    "test": "yarn spec",
     "upload-binary": "yarn build-release && node-pre-gyp package && node-pre-gyp-github publish",
     "version": "yarn build-release"
   },
