@@ -1,8 +1,8 @@
 name: Release
 
 on:
-  push:
-    branches: [release]
+  release:
+    branches: [published]
 jobs:
   build:
     strategy:
