@@ -8,8 +8,8 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [windows-latest]
-        node: ["14"]
+        platform: [windows-latest,ubuntu-latest,mac-os]
+        node: ["10","12","13","14"]
 
     runs-on: ${{ matrix.platform }}
 
