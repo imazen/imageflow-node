@@ -22,9 +22,7 @@
     "node-pre-gyp-github": "^1.4.3"
   },
   "scripts": {
-    "build": "cd ./native && cargo build && mv ./target/debug/libimageflow_node.so ./index.node",
     "build-release": "cd ./native && cargo build --release && mv ./target/release/libimageflow_node.so ./index.node",
-    "install": "node-pre-gyp install --fallback-to-build=false || neon build",
     "lint": "eslint .",
     "package": "node-pre-gyp package",
     "spec": "jest",
