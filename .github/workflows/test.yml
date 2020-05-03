@@ -44,7 +44,7 @@ jobs:
         if: matrix.platform=='macos-latest'
         run: cp ./native/target/debug/libimageflow_node.dylib ./index.node
       - name: Copy artifacts windows
-        if: matrix.platform=='windows-latest
+        if: matrix.platform=='windows-latest'
         run: cp .\native\target\debug\libimageflow_node.dll .\index.node
       - name: Test
         run: |
