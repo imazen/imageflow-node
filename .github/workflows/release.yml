@@ -44,7 +44,7 @@ jobs:
         with:
           LIBCLANG_PATH: 'C:\Program Files\LLVM\bin'
       - name: Build
-        run: cargo build --release
+        run: cargo build
         working-directory: native
       - name: Copy artifacts Linux
         if: matrix.platform=='ubuntu-latest'
