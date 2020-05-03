@@ -1,6 +1,6 @@
 # Node bindings for [Imageflow](https://github.com/imazen/imageflow)
 
-[![Build Status](https://travis-ci.org/imazen/imageflow-node.svg?branch=master)](https://travis-ci.org/imazen/imageflow-node)
+![Macos](https://github.com/imazen/imageflow-node/workflows/Test%20Macos/badge.svg) ![Linux](https://github.com/imazen/imageflow-node/workflows/Test%20Linux/badge.svg) ![Windows](https://github.com/imazen/imageflow-node/workflows/Test%20Windows/badge.svg)
 
 Quickly scale or modify images and optimize them for the web.
 
