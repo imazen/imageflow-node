@@ -3,7 +3,7 @@ name: Release
 on:
   release:
     types:
-      - published
+      - edited
 jobs:
   build:
     strategy:
@@ -60,19 +60,8 @@ jobs:
         if: matrix.platform=='windows-latest'
         run: cp ./native/target/debug/imageflow_node.dll ./libimageflow-${{steps.get.outputs.tag_name}}-${{ matrix.platform }}.node
         shell: bash
-      - name: Upload Release Asset Mac/Linux
-        if: matrix.platform=='ubuntu-latest' || matrix.platform=='macos-latest'
-        id: upload-release-asset-linux
-        uses: fnkr/github-action-ghr@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GHR_COMPRESS: gz
-          GHR_PATH: ./native/libimageflow-${{steps.get.tag_name}}-${{ matrix.platform }}.node
-      - name: Upload Release Asset Window
-        if: matrix.platform=='windows-latest'
-        id: upload-release-asset-window
-        uses: fnkr/github-action-ghr@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GHR_COMPRESS: gz
-          GHR_PATH: .\native\libimageflow-${{steps.get.tag_name}}-${{ matrix.platform }}.node
+      - name: Upload  
+      - uses: meeDamian/github-release@2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: ./libimageflow-${{steps.get.outputs.tag_name}}-${{ matrix.platform }}.node
