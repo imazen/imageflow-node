@@ -54,6 +54,7 @@ jobs:
       - name: Copy artifacts windows
         if: matrix.platform=='windows-latest'
         run: copy .\native\target\debug\libimageflow_node.dll .\native\index.node
+        shell: cmd
       - name: Test
         run: |
           yarn
