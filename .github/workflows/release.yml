@@ -1,9 +1,10 @@
 name: Release
 
 on:
+  push:
   release:
     types:
-      - edited
+      - [published,created,edited]
 jobs:
   build:
     strategy:
@@ -52,16 +53,16 @@ jobs:
         working-directory: native
       - name: Copy artifacts Linux
         if: matrix.platform=='ubuntu-latest'
-        run: cp ./native/target/debug/libimageflow_node.so ./libimageflow-${{steps.get.outputs.tag_name}}-${{ matrix.platform }}.node
+        run: cp ./native/target/debug/libimageflow_node.so ../libimageflow-${{steps.get.outputs.tag_name}}-${{ matrix.platform }}.node
       - name: Copy artifacts macos
         if: matrix.platform=='macos-latest'
-        run: cp ./native/target/debug/libimageflow_node.dylib ./libimageflow-${{steps.get.outputs.tag_name}}-${{ matrix.platform }}.node
+        run: cp ./native/target/debug/libimageflow_node.dylib ../libimageflow-${{steps.get.outputs.tag_name}}-${{ matrix.platform }}.node
       - name: Copy artifacts windows
         if: matrix.platform=='windows-latest'
-        run: cp ./native/target/debug/imageflow_node.dll ./libimageflow-${{steps.get.outputs.tag_name}}-${{ matrix.platform }}.node
+        run: cp ./native/target/debug/imageflow_node.dll ../libimageflow-${{steps.get.outputs.tag_name}}-${{ matrix.platform }}.node
         shell: bash
       - name: Upload  
         uses: meeDamian/github-release@2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: ./libimageflow-${{steps.get.outputs.tag_name}}-${{ matrix.platform }}.node
+          files: libimageflow-${{steps.get.outputs.tag_name}}-${{ matrix.platform }}.node
