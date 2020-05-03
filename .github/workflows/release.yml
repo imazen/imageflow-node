@@ -49,13 +49,13 @@ jobs:
         working-directory: native
       - name: Copy artifacts Linux
         if: matrix.platform=='ubuntu-latest'
-        run: cp ./native/target/debug/libimageflow_node.so ../../libimageflow-${{ matrix.platform }}.node
+        run: cp ./native/target/debug/libimageflow_node.so ./libimageflow-${{ matrix.platform }}.node
       - name: Copy artifacts macos
         if: matrix.platform=='macos-latest'
-        run: cp ./native/target/debug/libimageflow_node.dylib ../../libimageflow-${{ matrix.platform }}.node
+        run: cp ./native/target/debug/libimageflow_node.dylib ./libimageflow-${{ matrix.platform }}.node
       - name: Copy artifacts windows
         if: matrix.platform=='windows-latest'
-        run: cp ./native/target/debug/imageflow_node.dll ../../libimageflow-${{ matrix.platform }}.node
+        run: cp ./native/target/debug/imageflow_node.dll ./libimageflow-${{ matrix.platform }}.node
         shell: bash
       - name: Upload to release
         uses: Shopify/upload-to-release@master
@@ -63,4 +63,4 @@ jobs:
           name: libimageflow-${{ matrix.platform }}.node
           path: libimageflow-${{ matrix.platform }}.node
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          content-type: text/plain # Optional
+          content-type: text/plain
