@@ -38,6 +38,7 @@ jobs:
         if: matrix.platform=='windows-latest'
         run: choco install -y llvm 
       - name: set environment variables
+        if: matrix.platform=='windows-latest'
         uses: allenevans/set-env@v1.0.0
         with:
           LIBCLANG_PATH: 'C:\Program Files\LLVM\bin'
