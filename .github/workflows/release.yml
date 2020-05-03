@@ -56,8 +56,9 @@ jobs:
         if: matrix.platform=='windows-latest'
         run: cp ./native/target/debug/imageflow_node.dll ../libimageflow-${{ matrix.platform }}.node
         shell: bash
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Upload to release
+        uses: JasonEtco/upload-to-release@master
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          files: libimageflow-${{ matrix.platform }}.node
+          args: libimageflow-${{ matrix.platform }}.node
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
