@@ -57,7 +57,7 @@ jobs:
         run: cp ./native/target/debug/imageflow_node.dll ../../libimageflow-${{ matrix.platform }}.node
         shell: bash
       - name: Upload to release
-        uses: Shopify/upload-to-release
+        uses: Shopify/upload-to-release@master
         with:
           name: libimageflow-${{ matrix.platform }}.node
           path: libimageflow-${{ matrix.platform }}.node
