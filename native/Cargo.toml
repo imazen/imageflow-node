@@ -17,4 +17,6 @@ imageflow_core = { git = "https://github.com/imazen/imageflow", tag="v1.3.6-rc36
 imageflow_types = { git = "https://github.com/imazen/imageflow", tag="v1.3.6-rc36" }
 nodejs-sys = "0.3.0"
 threadpool = "1.8.0"
-reqwest = "0.10.4"
+
+[target.'cfg(windows)'.dependencies]
+reqwest = { version = "0.10", features = ["native-tls", "blocking"] }

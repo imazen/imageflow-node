@@ -8,7 +8,7 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [macos-latest, windows-latest, ubuntu-latest]
+        platform: [windows-latest]
         node: ["14"]
 
     runs-on: ${{ matrix.platform }}
@@ -36,7 +36,7 @@ jobs:
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
       - name: Install llvm
         if: matrix.platform=='windows-latest'
-        run: choco install -y llvm 
+        run: choco install -y llvm
       - name: set environment variables
         if: matrix.platform=='windows-latest'
         uses: allenevans/set-env@v1.0.0
