@@ -2,14 +2,15 @@ name: Test
 
 on:
   push:
+    branches: master
   pull_request:
 
 jobs:
   build:
     strategy:
       matrix:
-        platform: [windows-latest,ubuntu-latest,macos-latest]
-        node: ["10","12","13","14"]
+        platform: [windows-latest, ubuntu-latest, macos-latest, ubuntu-16.04]
+        node: ["10", "12", "13", "14"]
 
     runs-on: ${{ matrix.platform }}
 
