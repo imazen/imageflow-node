@@ -34,6 +34,13 @@ jobs:
         with:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install llvm
+        if: matrix.platform=='windows-latest'
+        run: choco install -y llvm 
+      - name: set environment variables
+        uses: allenevans/set-env@v1.0.0
+        with:
+          LIBCLANG_PATH: 'C:\Program Files\LLVM\bin'
       - name: Build
         run: cargo build
         working-directory: native
