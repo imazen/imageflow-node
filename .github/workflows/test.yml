@@ -53,7 +53,11 @@ jobs:
         run: cp ./native/target/debug/libimageflow_node.dylib ./native/index.node
       - name: Copy artifacts windows
         if: matrix.platform=='windows-latest'
-        run: cp .\native\target\debug\libimageflow_node.dll .\native\index.node
+        run: cp ./native/target/debug/imageflow_node.dll ./native/index.node
+        shell: bash
+      - name: Copy artifacts windows
+        if: matrix.platform=='windows-latest'
+        run: ls ./native/target/debug
         shell: bash
       - name: Test
         run: |
