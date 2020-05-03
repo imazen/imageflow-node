@@ -39,14 +39,14 @@ jobs:
         working-directory: native
       - name: Copy artifacts Linux
         if: matrix.platform=='ubuntu-latest'
-      - run: cp ./native/target/debug/libimageflow_node.so ./index.node
+        run: cp ./native/target/debug/libimageflow_node.so ./index.node
       - name: Copy artifacts macos
         if: matrix.platform=='macos-latest'
-      - run: cp ./native/target/debug/libimageflow_node.dylib ./index.node
+        run: cp ./native/target/debug/libimageflow_node.dylib ./index.node
       - name: Copy artifacts windows
         if: matrix.platform=='windows-latest
-      - run: cp .\native\target\debug\libimageflow_node.dll .\index.node
+        run: cp .\native\target\debug\libimageflow_node.dll .\index.node
       - name: Test
-      - run: |
+        run: |
           yarn
           yarn test
