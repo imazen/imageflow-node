@@ -1,6 +1,6 @@
 {
   "name": "imageflow",
-  "version": "0.1.1",
+  "version": "0.0.1",
   "description": "Modify and optimize images at lightspeed",
   "main": "lib/index.js",
   "author": "Lilith River <lilith@imazen.io>",
@@ -11,37 +11,20 @@
   "bugs": {
     "url": "https://github.com/imazen/imageflow-node/issues"
   },
-  "files": [
-    "native/index.node",
-    "lib"
-  ],
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "neon-cli": "^0.4.0",
-    "node-pre-gyp": "amilajack/node-pre-gyp#neon-compat",
-    "node-pre-gyp-github": "^1.4.3"
+    "axios": "^0.19.2"
   },
   "scripts": {
-    "build-release": "cd ./native && cargo build --release && mv ./target/release/libimageflow_node.so ./index.node",
     "lint": "eslint .",
-    "package": "node-pre-gyp package",
     "spec": "jest",
     "test": "yarn spec",
-    "upload-binary": "yarn build-release && node-pre-gyp package && node-pre-gyp-github publish",
-    "version": "yarn build-release"
+    "install": "node scripts/download"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-bliss": "^4.8.1",
     "jest": "^25.2.4"
-  },
-  "binary": {
-    "module_name": "index",
-    "host": "https://github.com/imazen/imageflow-node/releases/download/",
-    "remote_path": "{version}",
-    "package_name": "{node_abi}-{platform}-{arch}.tar.gz",
-    "module_path": "./native",
-    "pkg_path": "."
   },
   "eslintConfig": {
     "extends": "bliss",
