@@ -2,7 +2,7 @@ name: Test Macos
 
 on:
   push:
-    branches: master
+    branches-ignore: master
   pull_request:
 
 jobs:

@@ -2,7 +2,7 @@ name: Test Linux
 
 on:
   push:
-    branches: master
+    branches-ignore: master
   pull_request:
 
 jobs:
