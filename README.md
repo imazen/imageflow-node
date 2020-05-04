@@ -10,8 +10,7 @@ Your bandwidth and electricity savings should cover it.
 ## Features
 
 * Does not depend on system dependencies
-* Cross-platform
-* Built using [Neon](https://github.com/neon-bindings/neon)!
+* Cross-platform (linux, mac, and windows)
 
 ## Installation
 
