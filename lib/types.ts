@@ -569,3 +569,137 @@ export class ExpandCanvas<T extends Colors> extends BaseStep {
         this.color = color
     }
 }
+
+enum FitMode {
+    Distort = 'distort',
+    Within = 'within',
+    Fit = 'fit',
+    WithinCrop = 'within_crop',
+    FitCrop = 'fit_crop',
+}
+
+interface FitBox {
+    toFitBox(): Object
+}
+
+interface FitBoxCordinates {
+    x1: Number
+    y1: Number
+    x2: Number
+    y2: Number
+}
+
+export class FitBoxPercentage {
+    private x1: Number
+    private y1: Number
+    private x2: Number
+    private y2: Number
+    toFitBox(): Object {
+        return {
+            image_percentage: {
+                x1: this.x1,
+                y1: this.y1,
+                x2: this.x2,
+                y2: this.y2,
+            },
+        }
+    }
+
+    constructor({ x1, x2, y1, y2 }: FitBoxCordinates) {
+        this.x1 = x1
+        this.x2 = x2
+        this.y1 = y1
+        this.y2 = y2
+    }
+}
+
+export class FitBoxMargin {
+    private left: Number
+    private top: Number
+    private right: Number
+    private bottom: Number
+    toFitBox(): Object {
+        return {
+            image_margins: {
+                left: this.left,
+                top: this.top,
+                right: this.right,
+                bottom: this.bottom,
+            },
+        }
+    }
+
+    constructor({
+        top = 0,
+        left = 0,
+        right = 0,
+        bottom = 0,
+    }: ExpandCanvasOptions) {
+        this.top = top
+        this.left = left
+        this.right = right
+        this.bottom = bottom
+    }
+}
+
+export class WaterMark extends BaseStep {
+    private ioID: Number
+    private gravity: ConstraintGravity
+    private fitMode: FitMode
+    private fitbox: FitBox
+    private opacity: Number
+    private hint: ConstraintHints
+    toStep(): Object {
+        return {
+            watermark: {
+                io_id: this.ioID,
+                gravity: this.gravity.toGravity(),
+                fit_mode: this.fitMode,
+                fit_box: this.fitbox.toFitBox(),
+                opacity: this.opacity,
+                hints: this.hint.toHint(),
+            },
+        }
+    }
+
+    constructor(
+        ioID: Number,
+        gravity: ConstraintGravity,
+        mode: FitMode,
+        box: FitBox,
+        opacity: Number,
+        hint: ConstraintHints
+    ) {
+        super()
+        if (opacity > 1 || opacity < 0) throw new Error('invalid opacity value')
+        this.ioID = ioID
+        this.gravity = gravity
+        this.fitMode = mode
+        this.fitbox = box
+        this.opacity = opacity
+        this.hint = hint
+    }
+}
+
+export class CommandString extends BaseStep {
+    private command: String
+    private encode: Number
+    private decode: Number
+    toStep(): Object {
+        return {
+            command_string: {
+                kind: 'ir4',
+                value: this.command,
+                decode: this.encode,
+                encode: this.decode,
+            },
+        }
+    }
+
+    constructor(command: String, encode: Number, decode: Number) {
+        super()
+        this.command = command
+        this.decode = decode
+        this.encode = encode
+    }
+}
