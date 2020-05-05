@@ -515,24 +515,6 @@ export class SRGBColor extends Colors {
     }
 }
 
-export class LinearColor extends Colors {
-    private type: ColorType
-    private value: String
-    toColor(): Object {
-        return {
-            linear: {
-                [this.type]: this.value,
-            },
-        }
-    }
-
-    constructor(type: ColorType, value: String) {
-        super()
-        this.type = type
-        this.value = value
-    }
-}
-
 interface ExpandCanvasOptions {
     top: Number
     right: Number
