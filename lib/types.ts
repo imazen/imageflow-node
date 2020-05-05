@@ -582,7 +582,7 @@ interface FitBox {
     toFitBox(): Object
 }
 
-interface FitBoxCordinates {
+interface FitBoxCoordinates {
     x1: Number
     y1: Number
     x2: Number
@@ -605,7 +605,7 @@ export class FitBoxPercentage {
         }
     }
 
-    constructor({ x1, x2, y1, y2 }: FitBoxCordinates) {
+    constructor({ x1, x2, y1, y2 }: FitBoxCoordinates) {
         this.x1 = x1
         this.x2 = x2
         this.y1 = y1
