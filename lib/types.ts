@@ -317,7 +317,7 @@ interface ConstraintOptions {
 export class Constraint extends BaseStep {
     private hints?: ConstraintHints
     private readonly width?: Number
-    private readonly hieght?: Number
+    private readonly height?: Number
     private gravity?: ConstraintGravity
     private mode: ConstraintMode
     private readonly canvasColor?: String
@@ -326,7 +326,7 @@ export class Constraint extends BaseStep {
             constrain: {
                 mode: this.mode.toString(),
                 w: this.width,
-                h: this.hieght,
+                h: this.height,
                 hints: this.hints?.toHint(),
                 gravity: this.gravity?.toGravity(),
                 canvas_color: this.canvasColor,
@@ -337,7 +337,7 @@ export class Constraint extends BaseStep {
     constructor(
         mode: ConstraintMode,
         width: Number | null = null,
-        hieght: Number | null = null,
+        height: Number | null = null,
         {
             canvasColor = null,
             canvasGravity = null,
@@ -347,7 +347,7 @@ export class Constraint extends BaseStep {
         super()
         this.mode = mode
         this.width = width
-        this.hieght = hieght
+        this.height = height
         this.canvasColor = canvasColor
         this.gravity = canvasGravity
         this.hints = hints
