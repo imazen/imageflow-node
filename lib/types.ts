@@ -646,7 +646,7 @@ export class Watermark extends BaseStep {
     private readonly ioID: Number
     private gravity: ConstraintGravity
     private readonly fitMode: FitMode
-    private fitbox: FitBox
+    private fitBox: FitBox
     private readonly opacity: Number
     private hint: ConstraintHints
     toStep(): Object {
@@ -655,7 +655,7 @@ export class Watermark extends BaseStep {
                 io_id: this.ioID,
                 gravity: this.gravity.toGravity(),
                 fit_mode: this.fitMode,
-                fit_box: this.fitbox.toFitBox(),
+                fit_box: this.fitBox.toFitBox(),
                 opacity: this.opacity,
                 hints: this.hint.toHint(),
             },
@@ -675,7 +675,7 @@ export class Watermark extends BaseStep {
         this.ioID = ioID
         this.gravity = gravity
         this.fitMode = mode
-        this.fitbox = box
+        this.fitBox = box
         this.opacity = opacity
         this.hint = hint
     }
