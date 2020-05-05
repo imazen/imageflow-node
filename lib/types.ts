@@ -4,7 +4,7 @@ export enum Direction {
 }
 
 export class IOData {
-    private io_id: Number
+    private readonly io_id: Number
     direction: Direction
     io: String
     get ioID() {
@@ -23,7 +23,7 @@ export abstract class BaseStep {
 }
 
 export class Decode extends BaseStep {
-    private io_id: Number
+    private readonly io_id: Number
 
     toStep(): Object {
         return {
@@ -52,8 +52,8 @@ export class GIF extends Preset {
 }
 
 export class MozJPEG extends Preset {
-    private quality: Number
-    private isProgressive: boolean
+    private readonly quality: Number
+    private readonly isProgressive: boolean
     toPreset(): Object {
         return {
             mozjpeg: {
@@ -73,7 +73,7 @@ export class MozJPEG extends Preset {
 }
 
 export class LosslessPNG extends Preset {
-    private maximumDeflate: boolean
+    private readonly maximumDeflate: boolean
     toPreset(): Object {
         return {
             lodepng: {
@@ -89,10 +89,10 @@ export class LosslessPNG extends Preset {
 }
 
 export class LossyPNG extends Preset {
-    private quality: Number
-    private minimumQuality: Number
-    private speed: Number | null
-    private maxDeflate: boolean
+    private readonly quality: Number
+    private readonly minimumQuality: Number
+    private readonly speed: Number | null
+    private readonly maxDeflate: boolean
     toPreset(): Object {
         return {
             pngquant: {
@@ -124,7 +124,7 @@ export class LossyPNG extends Preset {
 }
 
 export class WebP extends Preset {
-    private quality: Number
+    private readonly quality: Number
     toPreset(): Object {
         return {
             webplossy: {
@@ -148,7 +148,7 @@ export class WebPLossless extends Preset {
 
 export class Encode<T extends Preset> extends BaseStep {
     private preset: T
-    private io_id: Number
+    private readonly io_id: Number
     toStep(): Object {
         return {
             encode: {
@@ -228,7 +228,7 @@ interface ConstraintHintsOptions {
 }
 
 class ConstraintHints {
-    private sharpenPercent: Number
+    private readonly sharpenPercent: Number
     private downFilter: Filter | null
     private upFilter: Filter | null
     private scalingColorSpace: ScalingFloatspace | null
@@ -266,8 +266,8 @@ class ConstraintHints {
 }
 
 export class ConstraintGravity {
-    private x: Number
-    private y: Number
+    private readonly x: Number
+    private readonly y: Number
 
     toGravity(): Object {
         return {
@@ -316,11 +316,11 @@ interface ConstraintOptions {
 }
 export class Constraint extends BaseStep {
     private hints?: ConstraintHints
-    private width?: Number
-    private hieght?: Number
+    private readonly width?: Number
+    private readonly hieght?: Number
     private gravity?: ConstraintGravity
     private mode: ConstraintMode
-    private canvasColor?: String
+    private readonly canvasColor?: String
     toStep(): Object {
         return {
             constrain: {
@@ -355,10 +355,10 @@ export class Constraint extends BaseStep {
 }
 
 export class RegionPercentage extends BaseStep {
-    private x1: Number
-    private y1: Number
-    private x2: Number
-    private y2: Number
+    private readonly x1: Number
+    private readonly y1: Number
+    private readonly x2: Number
+    private readonly y2: Number
     private backgroundColor: String
     toStep(): Object {
         return {
@@ -382,10 +382,10 @@ export class RegionPercentage extends BaseStep {
 }
 
 export class Region extends BaseStep {
-    private x1: Number
-    private y1: Number
-    private x2: Number
-    private y2: Number
+    private readonly x1: Number
+    private readonly y1: Number
+    private readonly x2: Number
+    private readonly y2: Number
     private backgroundColor: String
     toStep(): Object {
         return {
@@ -409,8 +409,8 @@ export class Region extends BaseStep {
 }
 
 export class CropWhiteSpace extends BaseStep {
-    private threshold: Number
-    private padding: Number
+    private readonly threshold: Number
+    private readonly padding: Number
     toStep(): Object {
         return {
             crop_whitespace: {
@@ -462,11 +462,11 @@ export class FlipH extends BaseStep {
 }
 
 export class FillRect extends BaseStep {
-    private x1: Number
-    private x2: Number
-    private y1: Number
-    private y2: Number
-    private color: String
+    private readonly x1: Number
+    private readonly x2: Number
+    private readonly y1: Number
+    private readonly y2: Number
+    private readonly color: String
     toStep(): Object {
         return {
             fill_rect: {
@@ -498,8 +498,8 @@ enum ColorType {
 }
 
 export class SRGBColor extends Colors {
-    private type: ColorType
-    private value: String
+    private readonly type: ColorType
+    private readonly value: String
     toColor(): Object {
         return {
             srbg: {
@@ -541,10 +541,10 @@ interface ExpandCanvasOptions {
 }
 
 export class ExpandCanvas<T extends Colors> extends BaseStep {
-    private top: Number
-    private right: Number
-    private bottom: Number
-    private left: Number
+    private readonly top: Number
+    private readonly right: Number
+    private readonly bottom: Number
+    private readonly left: Number
     private color: T
     toStep(): Object {
         return {
@@ -590,10 +590,10 @@ interface FitBoxCordinates {
 }
 
 export class FitBoxPercentage {
-    private x1: Number
-    private y1: Number
-    private x2: Number
-    private y2: Number
+    private readonly x1: Number
+    private readonly y1: Number
+    private readonly x2: Number
+    private readonly y2: Number
     toFitBox(): Object {
         return {
             image_percentage: {
@@ -614,10 +614,10 @@ export class FitBoxPercentage {
 }
 
 export class FitBoxMargin {
-    private left: Number
-    private top: Number
-    private right: Number
-    private bottom: Number
+    private readonly left: Number
+    private readonly top: Number
+    private readonly right: Number
+    private readonly bottom: Number
     toFitBox(): Object {
         return {
             image_margins: {
@@ -643,11 +643,11 @@ export class FitBoxMargin {
 }
 
 export class WaterMark extends BaseStep {
-    private ioID: Number
+    private readonly ioID: Number
     private gravity: ConstraintGravity
-    private fitMode: FitMode
+    private readonly fitMode: FitMode
     private fitbox: FitBox
-    private opacity: Number
+    private readonly opacity: Number
     private hint: ConstraintHints
     toStep(): Object {
         return {
@@ -682,9 +682,9 @@ export class WaterMark extends BaseStep {
 }
 
 export class CommandString extends BaseStep {
-    private command: String
-    private encode: Number
-    private decode: Number
+    private readonly command: String
+    private readonly encode: Number
+    private readonly decode: Number
     toStep(): Object {
         return {
             command_string: {
