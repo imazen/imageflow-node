@@ -502,7 +502,7 @@ export class SRGBColor extends Colors {
     private readonly value: String
     toColor(): Object {
         return {
-            srbg: {
+            srgb: {
                 [this.type]: this.value,
             },
         }
