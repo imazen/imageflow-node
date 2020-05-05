@@ -642,7 +642,7 @@ export class FitBoxMargin {
     }
 }
 
-export class WaterMark extends BaseStep {
+export class Watermark extends BaseStep {
     private readonly ioID: Number
     private gravity: ConstraintGravity
     private readonly fitMode: FitMode
