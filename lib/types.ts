@@ -408,7 +408,7 @@ export class Region extends BaseStep {
     }
 }
 
-export class CropWhiteSpace extends BaseStep {
+export class CropWhitespace extends BaseStep {
     private readonly threshold: Number
     private readonly padding: Number
     toStep(): Object {
