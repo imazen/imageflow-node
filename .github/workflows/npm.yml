@@ -16,6 +16,10 @@ jobs:
           node-version: 10
       - name: Checkout code
         uses: actions/checkout@master
+      - name: Build Package
+        run: |
+           yarn
+           yarn build
       - id: publish
         uses: JS-DevTools/npm-publish@v1
         with:

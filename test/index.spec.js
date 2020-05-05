@@ -1,4 +1,4 @@
-const addon = require('..');
+const addon = require("..");
 
 describe('basic', () => {
 
@@ -7,13 +7,13 @@ describe('basic', () => {
   });
 
   it('should create a context', async () => {
-    let job = new addon.Job()
+    let job = new addon.NativeJob()
 
     expect(typeof job).toEqual('object');
   });
 
   it('should allow input bytes to be added and image width to be queried', async () => {
-    let job = new addon.Job()
+    let job = new addon.NativeJob()
     let array = new Uint8Array(
       [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 0x00,
         0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00,
@@ -22,7 +22,7 @@ describe('basic', () => {
 
     let slice = array.buffer.slice(array.byteOffset, array.byteLength + array.byteOffset)
 
-    job.addInputBytesCopied(0, slice);
+    job.addInputBytes(0, slice);
 
     let response = job.messageSync("v0.1/get_image_info", JSON.stringify({ io_id: 0 }));
     console.log(response);
@@ -33,7 +33,7 @@ describe('basic', () => {
   });
 
   it('should allow image to be upscaled', async () => {
-    let job = new addon.Job()
+    let job = new addon.NativeJob()
     let array = new Uint8Array(
       [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 0x00,
         0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00,
@@ -41,7 +41,7 @@ describe('basic', () => {
         0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82]);
 
     let slice = array.buffer.slice(array.byteOffset, array.byteLength + array.byteOffset)
-    job.addInputBytesCopied(0, slice);
+    job.addInputBytes(0, slice);
     job.addOutputBuffer(1);
 
     let job_task = {

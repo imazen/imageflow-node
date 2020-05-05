@@ -1,8 +1,9 @@
 {
-  "name": "imageflow",
+  "name": "@imazen/imageflow",
   "version": "0.0.1",
   "description": "Modify and optimize images at lightspeed",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
+  "type": "dist/index.d.ts",
   "author": "Lilith River <lilith@imazen.io>",
   "repository": {
     "type": "git",
@@ -19,12 +20,14 @@
     "lint": "eslint .",
     "spec": "jest",
     "test": "yarn spec",
-    "install": "node scripts/download"
+    "install": "node scripts/download",
+    "build": "yarn tsc"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-bliss": "^4.8.1",
-    "jest": "^25.2.4"
+    "jest": "^25.2.4",
+    "typescript": "^3.8.3"
   },
   "eslintConfig": {
     "extends": "bliss",
@@ -39,5 +42,16 @@
     "extends": [
       "bliss"
     ]
-  }
+  },
+  "homepage": "https://github.com/imazen/imageflow-node#readme",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "keywords": [
+    "image",
+    "processing",
+    "native",
+    "resize"
+  ]
 }
