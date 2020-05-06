@@ -16,75 +16,28 @@ import {
     Watermark,
     WatermarkOption,
     PresetInterface,
+    FlipH,
+    FlipV,
 } from './types'
 import { NativeJob } from './job'
 
 import * as fs from 'fs'
 
-function File(path: string) {}
 
 interface BaseStep {
     toStep(): object | string
 }
 
-class Execute {
-    private inner: Array<BaseStep>
-    private ioData: Array<IOData>
-    private ioID: number
-
-    constructor(work: Array<BaseStep>, io: Array<IOData>, ioId: number) {
-        this.inner = work
-        this.ioData = io
-        this.ioID = ioId
-    }
-
-    async execute(): Promise<Object> {
-        let job = new NativeJob()
-        let files = await Promise.all(
-            this.ioData.map(async (ioData) => {
-                if (ioData.direction == Direction.in) {
-                    let file = await fs.promises.readFile(ioData.fileName)
-                    job.addInputBytes(
-                        ioData.ioID,
-                        file.buffer.slice(
-                            file.byteOffset,
-                            file.byteOffset + file.byteLength
-                        )
-                    )
-                } else job.addOutputBuffer(ioData.ioID)
-                return ioData.toIOData()
-            })
-        )
-        let steps = this.inner.map((step) => step.toStep())
-        let str = await job.message(
-            'v0.1/execute',
-            JSON.stringify({
-                io: files,
-                framewise: {
-                    steps: steps,
-                },
-            })
-        )
-        let data = this.ioData[this.ioID]
-        let arrayBuffer = job.getOutputBufferBytes(data.ioID)
-        await fs.promises.writeFile(data.fileName, Buffer.from(arrayBuffer))
-        return JSON.parse(str)
-    }
-}
-
 export class Steps {
-    private inner: Array<BaseStep> = []
+    private graph: Graph
+    private vertex: Array<BaseStep> = []
     private ioID: number
-    private ioData: Array<IOData> = []
+    private inputs: Array<IOData> = []
+    private outputs: Array<IOData> = []
+    private last = 0
 
-    get work() {
-        return this.inner
-    }
-
-    get io() {
-        return this.ioData
-    }
     constructor(filename: string) {
+        this.graph = new Graph()
         this.ioID = 0
         const ioData = new IOData(
             filename,
@@ -93,54 +46,147 @@ export class Steps {
             this.ioID
         )
         const decode = new Decode(this.ioID)
-        this.ioData.push(ioData)
-        this.inner.push(decode)
+        this.inputs.push(ioData)
+        this.vertex.push(decode)
+        this.graph.addVertex(0)
+        this.last = 0
         this.ioID++
     }
     constraint(constarint: Constraint): Steps {
-        this.inner.push(constarint)
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(constarint)
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         return this
     }
     constraintWithin(width: number, hieght: number): Steps {
-        this.inner.push(new Constraint(ConstraintMode.Within, width, hieght))
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new Constraint(ConstraintMode.Within, width, hieght))
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         return this
     }
+
+    branch(f: (arg: Steps) => any) {
+        let last = this.last
+        f(this)
+        this.last = last
+        return this
+    }
+
+    async execute(): Promise<Object> {
+        let job = new NativeJob()
+        let files = await Promise.all(
+            this.inputs.map(async (ioData) => {
+                let file = await fs.promises.readFile(ioData.fileName)
+                job.addInputBytes(ioData.ioID, file.buffer)
+                return ioData.toIOData()
+            })
+        )
+        let outputFile = this.outputs.map((ioData) => {
+            job.addOutputBuffer(ioData.ioID)
+            return ioData.toIOData()
+        })
+        let nodes = this.vertex.reduce<{ [key: string]: any }>(
+            (acc: object, step: BaseStep, i: number) => {
+                acc[i.toString()] = step.toStep()
+                acc
+                return acc
+            },
+            {}
+        )
+        let s = JSON.stringify({
+            io: [...files, ...outputFile],
+            framewise: {
+                graph: {
+                    nodes: nodes,
+                    edges: this.graph.toEdge(),
+                },
+            },
+        })
+        let str = await job.message('v0.1/execute', s)
+        this.outputs.forEach((ioData) => {
+            let arrayBuffer = job.getOutputBufferBytes(ioData.ioID)
+            fs.promises.writeFile(ioData.fileName, Buffer.from(arrayBuffer))
+        })
+        return JSON.parse(str)
+    }
     rotate90(): Steps {
-        this.inner.push(new Rotate90())
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new Rotate90())
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         return this
     }
 
     rotate180(): Steps {
-        this.inner.push(new Rotate180())
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new Rotate180())
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         return this
     }
 
     rotate270(): Steps {
-        this.inner.push(new Rotate270())
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new Rotate270())
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         return this
     }
 
     rotate(rotate: Rotate180 | Rotate270 | Rotate90): Steps {
-        this.inner.push(rotate)
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(rotate)
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         return this
     }
 
     region(regionData: Region | RegionPercentage): Steps {
-        this.inner.push(regionData)
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(regionData)
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         return this
     }
     cropWhiteSpcae(data: CropWhitespace): Steps {
-        this.inner.push(data)
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(data)
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         return this
     }
 
     fillRect(data: FillRect): Steps {
-        this.inner.push(data)
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(data)
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         return this
     }
 
     expandCanvas(data: ExpandCanvas): Steps {
-        this.inner.push(data)
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(data)
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    flipHorizontal(): Steps {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new FlipH())
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    flipVertical(): Steps {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new FlipV())
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         return this
     }
 
@@ -151,14 +197,16 @@ export class Steps {
             'placeholder',
             this.ioID
         )
-        this.ioData.push(ioData)
-        const watermarkData = new Watermark(this.ioID, watermarkOption)
-        this.inner.push(watermarkData)
+        this.graph.addVertex(this.vertex.length)
+        this.inputs.push(ioData)
+        this.vertex.push(new Watermark(this.ioID, watermarkOption))
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
         this.ioID++
         return this
     }
 
-    encode(fileName: string, decodeData: PresetInterface): Execute {
+    encode(fileName: string, decodeData: PresetInterface): Steps {
         const ioData = new IOData(
             fileName,
             Direction.out,
@@ -166,8 +214,42 @@ export class Steps {
             this.ioID
         )
         const encoder = new Encode(decodeData, this.ioID)
-        this.ioData.push(ioData)
-        this.inner.push(encoder)
-        return new Execute(this.inner, this.ioData, this.ioID)
+        this.outputs.push(ioData)
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(encoder)
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        this.ioID++
+        return this
+    }
+}
+
+export class Graph {
+    _internal: Map<number, Array<number>> = new Map()
+
+    addVertex(vertex: number) {
+        if (this._internal.has(vertex))
+            throw new Error('vertex is already present')
+        else this._internal.set(vertex, [])
+    }
+
+    addEdge(to: number, from: number) {
+        if (!this._internal.has(from) || !this._internal.has(to))
+            throw new Error('vertext not found in graph')
+        this._internal.get(from).push(to)
+    }
+
+    toEdge(): Array<Object> {
+        let arr = []
+        for (const element of this._internal.entries()) {
+            for (const i of element[1]) {
+                arr.push({
+                    to: i,
+                    from: element[0],
+                    kind: 'input',
+                })
+            }
+        }
+        return arr
     }
 }
