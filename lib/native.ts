@@ -1,17 +1,18 @@
-const addon = require("../native/index.node")
+const addon = require('../native/index.node')
 
 export interface JobType {
     addInputBytesCopied(ioId: number, bytes: ArrayBuffer): void
     getOutputBufferBytes(ioId: number): ArrayBuffer
     addOutputBuffer(ioId: number): void
-    message(endPoint: String, tasks: String): Promise<String>
-    messageSync(endPoint: String, tasks: String): String
+    message(endPoint: string, tasks: string): Promise<string>
+    messageSync(endPoint: string, tasks: string): string
 }
 
 var Job: {
-    new(): JobType
+    new (): JobType
 } = addon.Job
 
-export default Job;
+export default Job
 
-export var getLongVersionString: () => String = addon.getLongVersionString
+export var getLongVersionString: () => string =
+    addon.getLongVersionString

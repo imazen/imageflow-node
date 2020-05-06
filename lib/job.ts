@@ -32,7 +32,7 @@ export class NativeJob {
         }
     }
 
-    async message(endPoint: String, tasks: String): Promise<String> {
+    async message(endPoint: string, tasks: string): Promise<string> {
         if (this.inUse) {
             throw new Error("Already running a Job");
         } else {
@@ -43,7 +43,7 @@ export class NativeJob {
         }
     }
 
-    messageSync(endPoint: String, tasks: String): String {
+    messageSync(endPoint: string, tasks: string): string {
         if (this.inUse) {
             throw new Error("Already running a Job");
         } else {

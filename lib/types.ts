@@ -1,29 +1,44 @@
 export enum Direction {
-    in,
-    out,
+    in="in",
+    out="out",
 }
 
 export class IOData {
-    private readonly io_id: Number
+    private readonly io_id: number
+    fileName: string
     direction: Direction
-    io: String
+    io: string
     get ioID() {
         return this.io_id
     }
 
-    constructor(direction: Direction, io: String, ioID: Number) {
+    toIOData(): Object {
+        return {
+            io_id: this.io_id,
+            direction: this.direction,
+            io: this.io,
+        }
+    }
+
+    constructor(
+        filename: string,
+        direction: Direction,
+        io: string,
+        ioID: number
+    ) {
         this.direction = direction
         this.io = io
         this.io_id = ioID
+        this.fileName = filename
     }
 }
 
 export abstract class BaseStep {
-    abstract toStep(): Object | String
+    abstract toStep(): Object | string
 }
 
 export class Decode extends BaseStep {
-    private readonly io_id: Number
+    private readonly io_id: number
 
     toStep(): Object {
         return {
@@ -35,24 +50,24 @@ export class Decode extends BaseStep {
     get ioID() {
         return this.io_id
     }
-    constructor(ioID: Number) {
+    constructor(ioID: number) {
         super()
         this.io_id = ioID
     }
 }
 
 abstract class Preset {
-    abstract toPreset(): Object | String
+    abstract toPreset(): Object | string
 }
 
 export class GIF extends Preset {
-    toPreset(): String {
+    toPreset(): string {
         return 'gif'
     }
 }
 
 export class MozJPEG extends Preset {
-    private readonly quality: Number
+    private readonly quality: number
     private readonly isProgressive: boolean
     toPreset(): Object {
         return {
@@ -63,7 +78,7 @@ export class MozJPEG extends Preset {
         }
     }
 
-    constructor(quality: Number, isProgressive: boolean) {
+    constructor(quality: number, isProgressive: boolean) {
         super()
         if (quality > 100 || quality < 0)
             throw new Error('invalid quality for preset')
@@ -89,9 +104,9 @@ export class LosslessPNG extends Preset {
 }
 
 export class LossyPNG extends Preset {
-    private readonly quality: Number
-    private readonly minimumQuality: Number
-    private readonly speed: Number | null
+    private readonly quality: number
+    private readonly minimumQuality: number
+    private readonly speed: number | null
     private readonly maxDeflate: boolean
     toPreset(): Object {
         return {
@@ -104,9 +119,9 @@ export class LossyPNG extends Preset {
         }
     }
     constructor(
-        quality: Number,
-        minQuality: Number,
-        speed: Number | null = null,
+        quality: number,
+        minQuality: number,
+        speed: number | null = null,
         maxdeflate: boolean = false
     ) {
         super()
@@ -124,7 +139,7 @@ export class LossyPNG extends Preset {
 }
 
 export class WebP extends Preset {
-    private readonly quality: Number
+    private readonly quality: number
     toPreset(): Object {
         return {
             webplossy: {
@@ -132,7 +147,7 @@ export class WebP extends Preset {
             },
         }
     }
-    constructor(quality: Number) {
+    constructor(quality: number) {
         super()
         if (quality > 100 || quality < 0)
             throw new Error('invalid quality for preset')
@@ -141,14 +156,18 @@ export class WebP extends Preset {
 }
 
 export class WebPLossless extends Preset {
-    toPreset(): String {
+    toPreset(): string {
         return 'webplossless'
     }
 }
 
-export class Encode<T extends Preset> extends BaseStep {
-    private preset: T
-    private readonly io_id: Number
+export interface PresetInterface {
+    toPreset(): Object | string
+}
+
+export class Encode extends BaseStep {
+    private preset: PresetInterface
+    private readonly io_id: number
     toStep(): Object {
         return {
             encode: {
@@ -158,7 +177,7 @@ export class Encode<T extends Preset> extends BaseStep {
         }
     }
 
-    constructor(preset: T, ioId: Number) {
+    constructor(preset: PresetInterface, ioId: number) {
         super()
         this.io_id = ioId
         this.preset = preset
@@ -228,7 +247,7 @@ interface ConstraintHintsOptions {
 }
 
 class ConstraintHints {
-    private readonly sharpenPercent: Number
+    private readonly sharpenPercent: number
     private downFilter: Filter | null
     private upFilter: Filter | null
     private scalingColorSpace: ScalingFloatspace | null
@@ -247,7 +266,7 @@ class ConstraintHints {
         }
     }
     constructor(
-        sharpenPercent: Number,
+        sharpenPercent: number,
         {
             downFilter,
             upFilter,
@@ -266,8 +285,8 @@ class ConstraintHints {
 }
 
 export class ConstraintGravity {
-    private readonly x: Number
-    private readonly y: Number
+    private readonly x: number
+    private readonly y: number
 
     toGravity(): Object {
         return {
@@ -277,7 +296,7 @@ export class ConstraintGravity {
             },
         }
     }
-    constructor(x: Number, y: Number) {
+    constructor(x: number, y: number) {
         this.x = x
         this.y = y
     }
@@ -310,17 +329,17 @@ export enum ConstraintMode {
 }
 
 interface ConstraintOptions {
-    canvasColor?: String
+    canvasColor?: string
     canvasGravity?: ConstraintGravity
     hints?: ConstraintHints
 }
 export class Constraint extends BaseStep {
     private hints?: ConstraintHints
-    private readonly width?: Number
-    private readonly height?: Number
+    private readonly width?: number
+    private readonly height?: number
     private gravity?: ConstraintGravity
     private mode: ConstraintMode
-    private readonly canvasColor?: String
+    private readonly canvasColor?: string
     toStep(): Object {
         return {
             constrain: {
@@ -336,8 +355,8 @@ export class Constraint extends BaseStep {
 
     constructor(
         mode: ConstraintMode,
-        width: Number | null = null,
-        height: Number | null = null,
+        width: number | null = null,
+        height: number | null = null,
         {
             canvasColor = null,
             canvasGravity = null,
@@ -355,11 +374,11 @@ export class Constraint extends BaseStep {
 }
 
 export class RegionPercentage extends BaseStep {
-    private readonly x1: Number
-    private readonly y1: Number
-    private readonly x2: Number
-    private readonly y2: Number
-    private backgroundColor: String
+    private readonly x1: number
+    private readonly y1: number
+    private readonly x2: number
+    private readonly y2: number
+    private backgroundColor: string
     toStep(): Object {
         return {
             region_percent: {
@@ -372,7 +391,7 @@ export class RegionPercentage extends BaseStep {
         }
     }
 
-    constructor(x1: Number, y1: Number, x2: Number, y2: Number) {
+    constructor({ x1, y1, x2, y2 }: FitBoxCoordinates) {
         super()
         this.x1 = x1
         this.y2 = y2
@@ -382,11 +401,11 @@ export class RegionPercentage extends BaseStep {
 }
 
 export class Region extends BaseStep {
-    private readonly x1: Number
-    private readonly y1: Number
-    private readonly x2: Number
-    private readonly y2: Number
-    private backgroundColor: String
+    private readonly x1: number
+    private readonly y1: number
+    private readonly x2: number
+    private readonly y2: number
+    private backgroundColor: string
     toStep(): Object {
         return {
             region: {
@@ -399,7 +418,7 @@ export class Region extends BaseStep {
         }
     }
 
-    constructor(x1: Number, y1: Number, x2: Number, y2: Number) {
+    constructor({ x1, y1, x2, y2 }: FitBoxCoordinates) {
         super()
         this.x1 = x1
         this.y2 = y2
@@ -409,8 +428,8 @@ export class Region extends BaseStep {
 }
 
 export class CropWhitespace extends BaseStep {
-    private readonly threshold: Number
-    private readonly padding: Number
+    private readonly threshold: number
+    private readonly padding: number
     toStep(): Object {
         return {
             crop_whitespace: {
@@ -420,7 +439,7 @@ export class CropWhitespace extends BaseStep {
         }
     }
 
-    constructor(threshold: Number, padding: Number) {
+    constructor(threshold: number, padding: number) {
         super()
         if (padding < 0 || padding > 100)
             throw new Error('invalid value for percentage')
@@ -432,41 +451,41 @@ export class CropWhitespace extends BaseStep {
 }
 
 export class Rotate90 extends BaseStep {
-    toStep(): String {
+    toStep(): string {
         return 'rotate_90'
     }
 }
 
 export class Rotate180 extends BaseStep {
-    toStep(): String {
+    toStep(): string {
         return 'rotate_180'
     }
 }
 
 export class Rotate270 extends BaseStep {
-    toStep(): String {
+    toStep(): string {
         return 'rotate_270'
     }
 }
 
 export class FlipV extends BaseStep {
-    toStep(): String {
+    toStep(): string {
         return 'flip_v'
     }
 }
 
 export class FlipH extends BaseStep {
-    toStep(): String {
+    toStep(): string {
         return 'flip_H'
     }
 }
 
 export class FillRect extends BaseStep {
-    private readonly x1: Number
-    private readonly x2: Number
-    private readonly y1: Number
-    private readonly y2: Number
-    private readonly color: String
+    private readonly x1: number
+    private readonly x2: number
+    private readonly y1: number
+    private readonly y2: number
+    private readonly color: string
     toStep(): Object {
         return {
             fill_rect: {
@@ -479,7 +498,7 @@ export class FillRect extends BaseStep {
         }
     }
 
-    constructor(x1: Number, y1: Number, x2: Number, y2: Number, color: String) {
+    constructor(x1: number, y1: number, x2: number, y2: number, color: string) {
         super()
         this.x1 = x1
         this.x2 = x2
@@ -493,13 +512,13 @@ export abstract class Colors {
     abstract toColor(): Object
 }
 
-enum ColorType {
+export enum ColorType {
     Hex = 'hex',
 }
 
 export class SRGBColor extends Colors {
     private readonly type: ColorType
-    private readonly value: String
+    private readonly value: string
     toColor(): Object {
         return {
             srgb: {
@@ -508,7 +527,7 @@ export class SRGBColor extends Colors {
         }
     }
 
-    constructor(type: ColorType, value: String) {
+    constructor(type: ColorType, value: string) {
         super()
         this.type = type
         this.value = value
@@ -516,18 +535,18 @@ export class SRGBColor extends Colors {
 }
 
 interface ExpandCanvasOptions {
-    top: Number
-    right: Number
-    bottom: Number
-    left: Number
+    top: number
+    right: number
+    bottom: number
+    left: number
 }
 
-export class ExpandCanvas<T extends Colors> extends BaseStep {
-    private readonly top: Number
-    private readonly right: Number
-    private readonly bottom: Number
-    private readonly left: Number
-    private color: T
+export class ExpandCanvas extends BaseStep {
+    private readonly top: number
+    private readonly right: number
+    private readonly bottom: number
+    private readonly left: number
+    private color: SRGBColor
     toStep(): Object {
         return {
             expand_canvas: {
@@ -541,7 +560,7 @@ export class ExpandCanvas<T extends Colors> extends BaseStep {
     }
     constructor(
         { top = 0, left = 0, right = 0, bottom = 0 }: ExpandCanvasOptions,
-        color: T
+        color: SRGBColor
     ) {
         super()
         this.top = top
@@ -565,17 +584,17 @@ interface FitBox {
 }
 
 interface FitBoxCoordinates {
-    x1: Number
-    y1: Number
-    x2: Number
-    y2: Number
+    x1: number
+    y1: number
+    x2: number
+    y2: number
 }
 
 export class FitBoxPercentage {
-    private readonly x1: Number
-    private readonly y1: Number
-    private readonly x2: Number
-    private readonly y2: Number
+    private readonly x1: number
+    private readonly y1: number
+    private readonly x2: number
+    private readonly y2: number
     toFitBox(): Object {
         return {
             image_percentage: {
@@ -596,10 +615,10 @@ export class FitBoxPercentage {
 }
 
 export class FitBoxMargin {
-    private readonly left: Number
-    private readonly top: Number
-    private readonly right: Number
-    private readonly bottom: Number
+    private readonly left: number
+    private readonly top: number
+    private readonly right: number
+    private readonly bottom: number
     toFitBox(): Object {
         return {
             image_margins: {
@@ -624,12 +643,20 @@ export class FitBoxMargin {
     }
 }
 
+export interface WatermarkOption {
+    gravity: ConstraintGravity
+    mode: FitMode
+    box: FitBox
+    opacity: number
+    hint: ConstraintHints
+}
+
 export class Watermark extends BaseStep {
-    private readonly ioID: Number
+    private readonly ioID: number
     private gravity: ConstraintGravity
     private readonly fitMode: FitMode
     private fitBox: FitBox
-    private readonly opacity: Number
+    private readonly opacity: number
     private hint: ConstraintHints
     toStep(): Object {
         return {
@@ -645,12 +672,8 @@ export class Watermark extends BaseStep {
     }
 
     constructor(
-        ioID: Number,
-        gravity: ConstraintGravity,
-        mode: FitMode,
-        box: FitBox,
-        opacity: Number,
-        hint: ConstraintHints
+        ioID: number,
+        { gravity, mode, box, opacity, hint }: WatermarkOption
     ) {
         super()
         if (opacity > 1 || opacity < 0) throw new Error('invalid opacity value')
@@ -663,10 +686,10 @@ export class Watermark extends BaseStep {
     }
 }
 
-export class CommandString extends BaseStep {
-    private readonly command: String
-    private readonly encode: Number
-    private readonly decode: Number
+export class Commandstring extends BaseStep {
+    private readonly command: string
+    private readonly encode: number
+    private readonly decode: number
     toStep(): Object {
         return {
             command_string: {
@@ -678,7 +701,7 @@ export class CommandString extends BaseStep {
         }
     }
 
-    constructor(command: String, encode: Number, decode: Number) {
+    constructor(command: string, encode: number, decode: number) {
         super()
         this.command = command
         this.decode = decode
