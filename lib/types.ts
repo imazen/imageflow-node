@@ -1,6 +1,8 @@
+import { Steps } from './json'
+
 export enum Direction {
-    in="in",
-    out="out",
+    in = 'in',
+    out = 'out',
 }
 
 export class IOData {
@@ -246,7 +248,7 @@ interface ConstraintHintsOptions {
     sharpenWhen?: SharpenWhen
 }
 
-class ConstraintHints {
+export class ConstraintHints {
     private readonly sharpenPercent: number
     private downFilter: Filter | null
     private upFilter: Filter | null
@@ -256,8 +258,8 @@ class ConstraintHints {
     toHint(): Object {
         return {
             sharpen_percent: this.sharpenPercent,
-            down_filter: this.downFilter.toString()?.toLowerCase(),
-            up_filter: this.upFilter.toString()?.toLowerCase(),
+            down_filter: this.downFilter?.toString()?.toLowerCase(),
+            up_filter: this.upFilter?.toString()?.toLowerCase(),
             scaling_colorspace: this.scalingColorSpace
                 ?.toString()
                 .toLowerCase(),
@@ -706,5 +708,150 @@ export class Commandstring extends BaseStep {
         this.command = command
         this.decode = decode
         this.encode = encode
+    }
+}
+
+export class WhiteBalance {
+    private threshold: number
+    toStep(): Object {
+        return {
+            white_balance_histogram_area_threshold_srgb: {
+                threshold: this.threshold,
+            },
+        }
+    }
+    constructor(threshold: number) {
+        this.threshold = threshold
+    }
+}
+export enum ColorFilterSRGBType {
+    GrayscaleNtsc = 'grayscale_ntsc',
+    GrayscaleFlat = 'grayscale_flat',
+    GrayscaleBt709 = 'grayscale_bt709',
+    GrayscaleRY = 'grayscale_ry',
+    Invert = 'invert',
+}
+
+export enum ColorFilterSRGBValueType {
+    Alpha = 'aplha',
+    Contrast = 'contrast',
+    Brightness = 'brightness',
+}
+
+export class ColorFilterSRGBValue {
+    private value: number
+    private valueType: ColorFilterSRGBValueType
+
+    constructor(value: number, valueType: ColorFilterSRGBValueType) {
+        this.value = value
+        this.valueType = valueType
+    }
+
+    toFilter(): Object {
+        return {
+            [this.valueType]: this.value,
+        }
+    }
+}
+
+export class ColorFilterSRGB extends BaseStep {
+    private filterType: ColorFilterSRGBType | ColorFilterSRGBValue
+    toStep(): Object {
+        return {
+            color_filter_srgb:
+                typeof this.filterType === 'string'
+                    ? this.filterType
+                    : this.filterType.toFilter(),
+        }
+    }
+
+    constructor(filter: ColorFilterSRGBType | ColorFilterSRGBValue) {
+        super()
+        this.filterType = filter
+    }
+}
+
+export interface DrawExactImageToCoordinate {
+    x: number
+    y: number
+    w: number
+    h: number
+}
+
+export class DrawExactImageTo extends BaseStep {
+    private x: number
+    private y: number
+    private w: number
+    private h: number
+
+    private blend: CompositingMode
+    private hint: ConstraintHints
+
+    toStep(): Object {
+        return {
+            draw_image_exact: {
+                x: this.x,
+                y: this.y,
+                w: this.w,
+                h: this.h,
+                blend: this.blend,
+                hints: this.hint.toHint(),
+            },
+        }
+    }
+
+    constructor(
+        { x = 0, y = 0, w = 0, h = 0 }: DrawExactImageToCoordinate,
+        blend: CompositingMode,
+        hint: ConstraintHints
+    ) {
+        super()
+        this.x = x
+        this.y = y
+        this.w = w
+        this.h = h
+        this.blend = blend
+        this.hint = hint
+    }
+}
+
+export enum CompositingMode {
+    Compose = 'compose',
+    Overwrite = 'overwrite',
+}
+
+export class CopyRectangle extends BaseStep {
+    private fromX: number
+    private fromY: number
+    private w: number
+    private h: number
+    private x: number
+    private y: number
+
+    toStep(): Object {
+        return {
+            copy_rect_to_canvas: {
+                from_x: this.fromX,
+                from_y: this.fromY,
+                w: this.w,
+                h: this.h,
+                x: this.x,
+                y: this.y,
+            },
+        }
+    }
+
+    constructor(
+        { x = 0, y = 0, w = 0, h = 0 }: DrawExactImageToCoordinate,
+        fromX: number,
+        fromY: number
+    ) {
+        super()
+        this.x = x
+        this.y = y
+        this.w = w
+        this.h = h
+        this.fromX = fromX
+        this.fromY = fromY
     }
 }

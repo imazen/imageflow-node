@@ -18,11 +18,19 @@ import {
     PresetInterface,
     FlipH,
     FlipV,
+    ColorFilterSRGB,
+    ColorFilterSRGBType,
+    ColorFilterSRGBValue,
+    ColorFilterSRGBValueType,
+    DrawExactImageTo,
+    DrawExactImageToCoordinate,
+    ConstraintHints,
+    CompositingMode,
+    CopyRectangle,
 } from './types'
 import { NativeJob } from './job'
 
 import * as fs from 'fs'
-
 
 interface BaseStep {
     toStep(): object | string
@@ -52,6 +60,23 @@ export class Steps {
         this.last = 0
         this.ioID++
     }
+
+    decode(filename: string) {
+        const ioData = new IOData(
+            filename,
+            Direction.in,
+            'placeholder',
+            this.ioID
+        )
+        const decode = new Decode(this.ioID)
+        this.inputs.push(ioData)
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(decode)
+        //this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        this.ioID++
+        return this
+    }
     constraint(constarint: Constraint): Steps {
         this.graph.addVertex(this.vertex.length)
         this.vertex.push(constarint)
@@ -67,10 +92,26 @@ export class Steps {
         return this
     }
 
-    branch(f: (arg: Steps) => any) {
+    branch(f: (arg: Steps) => any): Steps {
         let last = this.last
         f(this)
         this.last = last
+        return this
+    }
+
+    drawImageExacTo(
+        f: (arg: Steps) => any,
+        cordinate: DrawExactImageToCoordinate,
+        blend: CompositingMode,
+        hint: ConstraintHints
+    ) {
+        let last = this.last
+        f(this)
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new DrawExactImageTo(cordinate, blend, hint))
+        this.graph.addEdge(this.vertex.length - 1, last, 'input')
+        this.graph.addEdge(this.vertex.length - 1, this.last, 'canvas')
+        this.last = this.vertex.length - 1
         return this
     }
 
@@ -104,6 +145,8 @@ export class Steps {
                 },
             },
         })
+
+        console.log(s)
         let str = await job.message('v0.1/execute', s)
         this.outputs.forEach((ioData) => {
             let arrayBuffer = job.getOutputBufferBytes(ioData.ioID)
@@ -222,10 +265,122 @@ export class Steps {
         this.ioID++
         return this
     }
+
+    colorFilterIvert(): Steps {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new ColorFilterSRGB(ColorFilterSRGBType.Invert))
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    colorFilterGrayscaleRY(): Steps {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new ColorFilterSRGB(ColorFilterSRGBType.GrayscaleRY))
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    colorFilterGraycaleBt709(): Steps {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(
+            new ColorFilterSRGB(ColorFilterSRGBType.GrayscaleBt709)
+        )
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    colorFilterGrayscaleFlat(): Steps {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new ColorFilterSRGB(ColorFilterSRGBType.GrayscaleFlat))
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    colorFilterGrayscaleNtsc(): Steps {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new ColorFilterSRGB(ColorFilterSRGBType.GrayscaleNtsc))
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    colorFilterAlpha(value: number): Steps {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(
+            new ColorFilterSRGB(
+                new ColorFilterSRGBValue(value, ColorFilterSRGBValueType.Alpha)
+            )
+        )
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    colorFilterBrightness(value: number): Steps {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(
+            new ColorFilterSRGB(
+                new ColorFilterSRGBValue(
+                    value,
+                    ColorFilterSRGBValueType.Brightness
+                )
+            )
+        )
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    colorFilterContrast(value: number): Steps {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(
+            new ColorFilterSRGB(
+                new ColorFilterSRGBValue(
+                    value,
+                    ColorFilterSRGBValueType.Contrast
+                )
+            )
+        )
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    colorFilter(value: ColorFilterSRGBValue) {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new ColorFilterSRGB(value))
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+    copyRectangle(
+        f: (args: Steps) => any,
+        cordinate: DrawExactImageToCoordinate,
+        fromX: number,
+        fromy: number
+    ) {
+        let last = this.last
+        f(this)
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new CopyRectangle(cordinate, fromX, fromy))
+        this.graph.addEdge(this.vertex.length - 1, last, 'input')
+        this.graph.addEdge(this.vertex.length - 1, this.last, 'canvas')
+        this.last = this.vertex.length - 1
+        return this
+    }
+}
+
+interface edge {
+    to: number
+    type: string
 }
 
 export class Graph {
-    _internal: Map<number, Array<number>> = new Map()
+    _internal: Map<number, Array<edge>> = new Map()
 
     addVertex(vertex: number) {
         if (this._internal.has(vertex))
@@ -233,10 +388,10 @@ export class Graph {
         else this._internal.set(vertex, [])
     }
 
-    addEdge(to: number, from: number) {
+    addEdge(to: number, from: number, type: string = 'input') {
         if (!this._internal.has(from) || !this._internal.has(to))
             throw new Error('vertext not found in graph')
-        this._internal.get(from).push(to)
+        this._internal.get(from).push({ to, type })
     }
 
     toEdge(): Array<Object> {
@@ -244,9 +399,9 @@ export class Graph {
         for (const element of this._internal.entries()) {
             for (const i of element[1]) {
                 arr.push({
-                    to: i,
+                    to: i.to,
                     from: element[0],
-                    kind: 'input',
+                    kind: i.type,
                 })
             }
         }
