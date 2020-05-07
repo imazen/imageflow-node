@@ -1,4 +1,7 @@
-import { Steps } from './json'
+import * as fs from 'fs'
+import * as stream from 'stream'
+import axios, { AxiosResponse } from 'axios'
+const str = require('stream-promise')
 
 export enum Direction {
     in = 'in',
@@ -39,7 +42,7 @@ export abstract class BaseStep {
     abstract toStep(): Object | string
 }
 
-export class Decode extends BaseStep {
+export class Decode implements BaseStep {
     private readonly io_id: number
 
     toStep(): Object {
@@ -53,7 +56,6 @@ export class Decode extends BaseStep {
         return this.io_id
     }
     constructor(ioID: number) {
-        super()
         this.io_id = ioID
     }
 }
@@ -62,13 +64,13 @@ abstract class Preset {
     abstract toPreset(): Object | string
 }
 
-export class GIF extends Preset {
+export class GIF implements Preset {
     toPreset(): string {
         return 'gif'
     }
 }
 
-export class MozJPEG extends Preset {
+export class MozJPEG implements Preset {
     private readonly quality: number
     private readonly isProgressive: boolean
     toPreset(): Object {
@@ -81,7 +83,6 @@ export class MozJPEG extends Preset {
     }
 
     constructor(quality: number, isProgressive: boolean) {
-        super()
         if (quality > 100 || quality < 0)
             throw new Error('invalid quality for preset')
         this.isProgressive = isProgressive
@@ -89,7 +90,7 @@ export class MozJPEG extends Preset {
     }
 }
 
-export class LosslessPNG extends Preset {
+export class LosslessPNG implements Preset {
     private readonly maximumDeflate: boolean
     toPreset(): Object {
         return {
@@ -100,12 +101,11 @@ export class LosslessPNG extends Preset {
     }
 
     constructor(maximumDeflate: boolean = false) {
-        super()
         this.maximumDeflate = maximumDeflate
     }
 }
 
-export class LossyPNG extends Preset {
+export class LossyPNG implements Preset {
     private readonly quality: number
     private readonly minimumQuality: number
     private readonly speed: number | null
@@ -126,7 +126,6 @@ export class LossyPNG extends Preset {
         speed: number | null = null,
         maxdeflate: boolean = false
     ) {
-        super()
         if (quality > 100 || quality < 0)
             throw new Error('invalid quality for preset')
         if (minQuality > 100 || minQuality < 0)
@@ -140,7 +139,7 @@ export class LossyPNG extends Preset {
     }
 }
 
-export class WebP extends Preset {
+export class WebP implements Preset {
     private readonly quality: number
     toPreset(): Object {
         return {
@@ -150,14 +149,13 @@ export class WebP extends Preset {
         }
     }
     constructor(quality: number) {
-        super()
         if (quality > 100 || quality < 0)
             throw new Error('invalid quality for preset')
         this.quality = quality
     }
 }
 
-export class WebPLossless extends Preset {
+export class WebPLossless implements Preset {
     toPreset(): string {
         return 'webplossless'
     }
@@ -167,7 +165,7 @@ export interface PresetInterface {
     toPreset(): Object | string
 }
 
-export class Encode extends BaseStep {
+export class Encode implements BaseStep {
     private preset: PresetInterface
     private readonly io_id: number
     toStep(): Object {
@@ -180,7 +178,6 @@ export class Encode extends BaseStep {
     }
 
     constructor(preset: PresetInterface, ioId: number) {
-        super()
         this.io_id = ioId
         this.preset = preset
     }
@@ -335,7 +332,7 @@ interface ConstraintOptions {
     canvasGravity?: ConstraintGravity
     hints?: ConstraintHints
 }
-export class Constraint extends BaseStep {
+export class Constraint implements BaseStep {
     private hints?: ConstraintHints
     private readonly width?: number
     private readonly height?: number
@@ -365,7 +362,6 @@ export class Constraint extends BaseStep {
             hints = null,
         }: ConstraintOptions = {}
     ) {
-        super()
         this.mode = mode
         this.width = width
         this.height = height
@@ -375,7 +371,7 @@ export class Constraint extends BaseStep {
     }
 }
 
-export class RegionPercentage extends BaseStep {
+export class RegionPercentage implements BaseStep {
     private readonly x1: number
     private readonly y1: number
     private readonly x2: number
@@ -394,7 +390,6 @@ export class RegionPercentage extends BaseStep {
     }
 
     constructor({ x1, y1, x2, y2 }: FitBoxCoordinates) {
-        super()
         this.x1 = x1
         this.y2 = y2
         this.x2 = x2
@@ -402,7 +397,7 @@ export class RegionPercentage extends BaseStep {
     }
 }
 
-export class Region extends BaseStep {
+export class Region implements BaseStep {
     private readonly x1: number
     private readonly y1: number
     private readonly x2: number
@@ -421,7 +416,6 @@ export class Region extends BaseStep {
     }
 
     constructor({ x1, y1, x2, y2 }: FitBoxCoordinates) {
-        super()
         this.x1 = x1
         this.y2 = y2
         this.x2 = x2
@@ -429,7 +423,7 @@ export class Region extends BaseStep {
     }
 }
 
-export class CropWhitespace extends BaseStep {
+export class CropWhitespace implements BaseStep {
     private readonly threshold: number
     private readonly padding: number
     toStep(): Object {
@@ -442,7 +436,6 @@ export class CropWhitespace extends BaseStep {
     }
 
     constructor(threshold: number, padding: number) {
-        super()
         if (padding < 0 || padding > 100)
             throw new Error('invalid value for percentage')
         if (threshold < 0 || threshold > 255)
@@ -452,37 +445,37 @@ export class CropWhitespace extends BaseStep {
     }
 }
 
-export class Rotate90 extends BaseStep {
+export class Rotate90 implements BaseStep {
     toStep(): string {
         return 'rotate_90'
     }
 }
 
-export class Rotate180 extends BaseStep {
+export class Rotate180 implements BaseStep {
     toStep(): string {
         return 'rotate_180'
     }
 }
 
-export class Rotate270 extends BaseStep {
+export class Rotate270 implements BaseStep {
     toStep(): string {
         return 'rotate_270'
     }
 }
 
-export class FlipV extends BaseStep {
+export class FlipV implements BaseStep {
     toStep(): string {
         return 'flip_v'
     }
 }
 
-export class FlipH extends BaseStep {
+export class FlipH implements BaseStep {
     toStep(): string {
         return 'flip_H'
     }
 }
 
-export class FillRect extends BaseStep {
+export class FillRect implements BaseStep {
     private readonly x1: number
     private readonly x2: number
     private readonly y1: number
@@ -501,7 +494,6 @@ export class FillRect extends BaseStep {
     }
 
     constructor(x1: number, y1: number, x2: number, y2: number, color: string) {
-        super()
         this.x1 = x1
         this.x2 = x2
         this.y1 = y1
@@ -518,7 +510,7 @@ export enum ColorType {
     Hex = 'hex',
 }
 
-export class SRGBColor extends Colors {
+export class SRGBColor implements Colors {
     private readonly type: ColorType
     private readonly value: string
     toColor(): Object {
@@ -530,7 +522,6 @@ export class SRGBColor extends Colors {
     }
 
     constructor(type: ColorType, value: string) {
-        super()
         this.type = type
         this.value = value
     }
@@ -543,7 +534,7 @@ interface ExpandCanvasOptions {
     left: number
 }
 
-export class ExpandCanvas extends BaseStep {
+export class ExpandCanvas implements BaseStep {
     private readonly top: number
     private readonly right: number
     private readonly bottom: number
@@ -564,7 +555,6 @@ export class ExpandCanvas extends BaseStep {
         { top = 0, left = 0, right = 0, bottom = 0 }: ExpandCanvasOptions,
         color: SRGBColor
     ) {
-        super()
         this.top = top
         this.left = left
         this.right = right
@@ -653,7 +643,7 @@ export interface WatermarkOption {
     hint: ConstraintHints
 }
 
-export class Watermark extends BaseStep {
+export class Watermark implements BaseStep {
     private readonly ioID: number
     private gravity: ConstraintGravity
     private readonly fitMode: FitMode
@@ -677,7 +667,6 @@ export class Watermark extends BaseStep {
         ioID: number,
         { gravity, mode, box, opacity, hint }: WatermarkOption
     ) {
-        super()
         if (opacity > 1 || opacity < 0) throw new Error('invalid opacity value')
         this.ioID = ioID
         this.gravity = gravity
@@ -688,7 +677,7 @@ export class Watermark extends BaseStep {
     }
 }
 
-export class Commandstring extends BaseStep {
+export class Commandstring implements BaseStep {
     private readonly command: string
     private readonly encode: number
     private readonly decode: number
@@ -704,7 +693,6 @@ export class Commandstring extends BaseStep {
     }
 
     constructor(command: string, encode: number, decode: number) {
-        super()
         this.command = command
         this.decode = decode
         this.encode = encode
@@ -754,7 +742,7 @@ export class ColorFilterSRGBValue {
     }
 }
 
-export class ColorFilterSRGB extends BaseStep {
+export class ColorFilterSRGB implements BaseStep {
     private filterType: ColorFilterSRGBType | ColorFilterSRGBValue
     toStep(): Object {
         return {
@@ -766,7 +754,6 @@ export class ColorFilterSRGB extends BaseStep {
     }
 
     constructor(filter: ColorFilterSRGBType | ColorFilterSRGBValue) {
-        super()
         this.filterType = filter
     }
 }
@@ -778,7 +765,7 @@ export interface DrawExactImageToCoordinate {
     h: number
 }
 
-export class DrawExactImageTo extends BaseStep {
+export class DrawExactImageTo implements BaseStep {
     private x: number
     private y: number
     private w: number
@@ -805,7 +792,6 @@ export class DrawExactImageTo extends BaseStep {
         blend: CompositingMode,
         hint: ConstraintHints
     ) {
-        super()
         this.x = x
         this.y = y
         this.w = w
@@ -820,7 +806,7 @@ export enum CompositingMode {
     Overwrite = 'overwrite',
 }
 
-export class CopyRectangle extends BaseStep {
+export class CopyRectangle implements BaseStep {
     private fromX: number
     private fromY: number
     private w: number
@@ -846,12 +832,148 @@ export class CopyRectangle extends BaseStep {
         fromX: number,
         fromY: number
     ) {
-        super()
         this.x = x
         this.y = y
         this.w = w
         this.h = h
         this.fromX = fromX
         this.fromY = fromY
+    }
+}
+
+export abstract class IOOperation {
+    abstract toIOBuffer(): Promise<ArrayBuffer | SharedArrayBuffer>
+    abstract toIOID(): Object
+    abstract setIOID(id: number, direction: Direction): void
+    abstract get ioID(): number
+    abstract toOutput(buffer: ArrayBuffer, collector: Object): Promise<any>
+}
+
+export class FromFile implements IOOperation {
+    private filename: string
+    private ioId: number
+    private direction: Direction
+    async toIOBuffer(): Promise<ArrayBuffer | SharedArrayBuffer> {
+        let file = fs.promises.readFile(this.filename)
+        return (await file).buffer
+    }
+    get ioID() {
+        return this.ioId
+    }
+    constructor(filename: string) {
+        this.filename = filename
+    }
+    setIOID(id: number, direction: Direction) {
+        this.ioId = id
+        this.direction = direction
+    }
+
+    toIOID(): Object {
+        return {
+            io_id: this.ioId,
+            direction: this.direction,
+            io: 'placeholder',
+        }
+    }
+
+    async toOutput(buffer: ArrayBuffer, collector: Object) {
+        await fs.promises.writeFile(this.filename, Buffer.from(buffer))
+    }
+}
+
+export class FromStream implements IOOperation {
+    private ioId: number
+    private direction: Direction
+    private internalStream: stream.Writable
+    constructor(str: stream.Writable) {
+        this.internalStream = str
+    }
+
+    async toIOBuffer(): Promise<ArrayBuffer | SharedArrayBuffer> {
+        let buffer = await str(this.internalStream)
+        return buffer.buffer
+    }
+    toIOID(): Object {
+        return {
+            io_id: this.ioId,
+            direction: this.direction,
+            io: 'placeholder',
+        }
+    }
+    setIOID(id: number, direction: Direction) {
+        this.ioId = id
+        this.direction = direction
+    }
+    get ioID(): number {
+        return this.ioID
+    }
+    async toOutput(buffer: ArrayBuffer, collector: Object): Promise<any> {
+        this.internalStream.end(Buffer.from(buffer))
+    }
+}
+
+export class FromBuffer implements IOOperation {
+    private buffer: Buffer
+    private ioId: number
+    private direction: Direction
+    private key: string
+
+    async toIOBuffer(): Promise<ArrayBuffer | SharedArrayBuffer> {
+        return this.buffer.buffer
+    }
+    constructor(buf: Buffer, key: string) {
+        this.buffer = buf
+        this.key = key
+    }
+    toIOID(): Object {
+        return {
+            io_id: this.ioId,
+            direction: this.direction,
+            io: 'placeholder',
+        }
+    }
+    setIOID(id: number, direction: Direction) {
+        this.ioId = id
+        this.direction = direction
+    }
+    get ioID(): number {
+        return this.ioID
+    }
+    async toOutput(buffer: ArrayBuffer, collector: Object): Promise<any> {
+        collector[this.key] = buffer
+    }
+}
+
+export class FromURL implements IOOperation {
+    private url: string
+    private ioId: number
+    private direction: Direction
+    async toIOBuffer(): Promise<ArrayBuffer | SharedArrayBuffer> {
+        let file = axios.get<any, AxiosResponse<Buffer>>(this.url, {
+            responseType: 'arraybuffer',
+        })
+        return (await file).data.buffer
+    }
+    get ioID() {
+        return this.ioId
+    }
+    constructor(url: string) {
+        this.url = url
+    }
+    setIOID(id: number, direction: Direction) {
+        this.ioId = id
+        this.direction = direction
+    }
+
+    toIOID(): Object {
+        return {
+            io_id: this.ioId,
+            direction: this.direction,
+            io: 'placeholder',
+        }
+    }
+
+    async toOutput(buffer: ArrayBuffer, collector: Object) {
+        await axios.post(this.url, Buffer.from(buffer))
     }
 }
