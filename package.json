@@ -15,19 +15,22 @@
   "license": "AGPL-3.0-or-later",
   "dependencies": {
     "axios": "^0.19.2",
-    "stream-promise": "^3.2.0"
+    "stream-promise": "^3.2.0",
+    "typedoc": "^0.17.6"
   },
   "scripts": {
     "lint": "eslint .",
     "spec": "jest",
     "test": "yarn spec",
     "install": "node scripts/download",
-    "build": "yarn tsc"
+    "build": "yarn tsc",
+    "docs": "yarn typedoc"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-bliss": "^4.8.1",
     "jest": "^25.2.4",
+    "typedocs": "^0.6.7",
     "typescript": "^3.8.3"
   },
   "eslintConfig": {
