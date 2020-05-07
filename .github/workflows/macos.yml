@@ -42,4 +42,5 @@ jobs:
       - name: Test
         run: |
           yarn
+          yarn build
           yarn test
