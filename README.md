@@ -4,8 +4,8 @@
 
 Quickly scale or modify images and optimize them for the web.
 
-If the AGPLv3 does not work for you, get a [commercial license](https://imageresizing.net/pricing).
-Your bandwidth and electricity savings should cover it.
+If the AGPLv3 does not work for you, you can get a [commercial license](https://imageresizing.net/pricing) on a sliding scale. If you have more than 1 server doing image processing your savings should cover the cost. 
+
 
 ## Features
 
