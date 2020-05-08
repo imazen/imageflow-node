@@ -12,3 +12,5 @@ lib/
 .editorconfig
 tsconfig.json
 docs/
+yarn-error.log
+.prettierrc
