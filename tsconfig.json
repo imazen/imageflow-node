@@ -12,7 +12,7 @@
         "suppressImplicitAnyIndexErrors": true
     },
     "include": ["lib/**/*"],
-    "exclude": ["**/node_modules", "**/*.spec.ts"],
+    "exclude": ["**/node_modules", "**/*.spec.ts","**/*.d.ts"],
     "typedocOptions": {
         "mode": "library",
         "out": "docs",

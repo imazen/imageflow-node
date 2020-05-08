@@ -12,7 +12,7 @@ const {
 
 const fs = require('fs')
 
-let str = fs.readFileSync('test.jpg')
+let str = fs.readFileSync('./test/test.jpg')
 
 describe('basic', () => {
     it('should create a steps', async () => {
@@ -56,12 +56,7 @@ describe('basic', () => {
             .branch((step) =>
                 step
                     .drawImageExacTo(
-                        (step) =>
-                            step.decode(
-                                new FromURL(
-                                    'https://jpeg.org/images/jpeg-home.jpg'
-                                )
-                            ),
+                        (step) => step.decode(new FromBuffer(str)),
                         {
                             w: 10,
                             h: 10,
