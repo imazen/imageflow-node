@@ -81,7 +81,7 @@
 				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
 					<h2>Installation</h2>
 				</a>
-				<pre><code class="language-bash">npm install imageflow</code></pre>
+				<pre><code class="language-bash">npm install @imazen/imageflow</code></pre>
 				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
 					<h2>Usage</h2>
 				</a>
@@ -92,7 +92,7 @@
     FromFile,
     FromStream,
     FromBuffer,
-} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'..'</span>)
+} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@imazen/imageflow'</span>)
 <span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>)
 
 <span class="hljs-keyword">let</span> step = <span class="hljs-keyword">new</span> Steps(<span class="hljs-keyword">new</span> FromURL(<span class="hljs-string">'https://jpeg.org/images/jpeg2000-home.jpg'</span>))
@@ -124,6 +124,75 @@ step.encode(<span class="hljs-keyword">new</span> FromBuffer(<span class="hljs-l
     .execute()
     .then(<span class="hljs-built_in">console</span>.log)
     .catch(<span class="hljs-built_in">console</span>.log)</code></pre>
+				<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
+					<h3>Examples</h3>
+				</a>
+				<ol>
+					<li>Reading a file from disk. <code>FromFile</code> provide an easy method for reading and writing images to disk.</li>
+				</ol>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> { MozJPEG, Steps, FromFile } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@imazen/imageflow'</span>)
+
+<span class="hljs-keyword">const</span> output = <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> Step(FromFile(<span class="hljs-string">'path/to/file'</span>))
+    .rotate180()
+    .encode(<span class="hljs-keyword">new</span> FromFile(<span class="hljs-string">'./path/to/output/file'</span>))
+    .execute()</code></pre>
+				<ol start="2">
+					<li>Reading from a stream. <code>FromStream</code> can read and write to a stream.</li>
+				</ol>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> { MozJPEG, Steps, FromStream } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@imazen/imageflow'</span>)
+
+<span class="hljs-keyword">const</span> output = <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> Step(FromStream(req))
+    .constraintWithin(<span class="hljs-number">400</span>, <span class="hljs-number">400</span>)
+    .encode(<span class="hljs-keyword">new</span> FromStream(res))
+    .execute()
+res.end()</code></pre>
+				<ol start="3">
+					<li>Reading from a url. <code>FromURL</code> can make a GET request to download and POST request to upload the image.</li>
+				</ol>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> { MozJPEG, Steps, FromURL } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@imazen/imageflow'</span>)
+
+<span class="hljs-keyword">const</span> output = <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> Step(<span class="hljs-keyword">new</span> FromURL(<span class="hljs-string">'url to image'</span>))
+    .colorFilterGrayscaleFlat()
+    .encode(<span class="hljs-keyword">new</span> FromURL(<span class="hljs-string">'url to image upload'</span>))
+    .execute()</code></pre>
+				<ol start="4">
+					<li>Providing buffer. <code>FromBuffer</code> can read and provide the output buffer. To read the output a key should be proivded, which used later to access buffer in the output.</li>
+				</ol>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> { MozJPEG, Steps, FromBuffer } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@imazen/imageflow'</span>)
+
+<span class="hljs-keyword">const</span> output = <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> Step(<span class="hljs-keyword">new</span> FromBuffer(<span class="hljs-keyword">get</span><span class="hljs-title">SoemBuffer</span>()))
+    .<span class="hljs-title">colorFilterGrayscaleFlat</span>()
+    .<span class="hljs-title">encode</span>(<span class="hljs-params">new FromBuffer(null, <span class="hljs-string">'key'</span></span>))
+    .<span class="hljs-title">execute</span>()
+<span class="hljs-title">console</span>.<span class="hljs-title">log</span>(<span class="hljs-params">output.key</span>)</code></pre>
+				<ol start="5">
+					<li>Perfroming Batch operations. <code>branch</code>, <code>decode</code> and <code>encode</code> are used together to perform batch operation. This example shows how to create varying size images from a single image.</li>
+				</ol>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> { MozJPEG, Steps, FromStream, FromFile } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@imazen/imageflow'</span>)
+
+<span class="hljs-keyword">const</span> test = <span class="hljs-keyword">new</span> Steps(<span class="hljs-keyword">new</span> FromStream(req))
+    .constraintWithin(<span class="hljs-number">800</span>, <span class="hljs-number">800</span>)
+    .branch(<span class="hljs-function">(<span class="hljs-params">step</span>) =&gt;</span> step.encode(<span class="hljs-keyword">new</span> FromFile(<span class="hljs-string">'large.jpeg'</span>), <span class="hljs-keyword">new</span> MozJPEG()))
+    .branch(<span class="hljs-function">(<span class="hljs-params">step</span>) =&gt;</span>
+        step
+            .constraintWithin(<span class="hljs-number">400</span>, <span class="hljs-number">400</span>)
+            .branch(<span class="hljs-function">(<span class="hljs-params">step</span>) =&gt;</span>
+                step
+                    .constraintWithin(<span class="hljs-number">200</span>, <span class="hljs-number">200</span>)
+                    .branch(<span class="hljs-function">(<span class="hljs-params">step</span>) =&gt;</span>
+                        step
+                            .constraintWithin(<span class="hljs-number">100</span>, <span class="hljs-number">100</span>)
+                            .encode(
+                                <span class="hljs-keyword">new</span> FromFile(<span class="hljs-string">'extra_small.jpeg'</span>),
+                                <span class="hljs-keyword">new</span> MozJPEG()
+                            )
+                    )
+                    .encode(<span class="hljs-keyword">new</span> FromFile(<span class="hljs-string">'small.jpeg'</span>), <span class="hljs-keyword">new</span> MozJPEG())
+            )
+            .encode(<span class="hljs-keyword">new</span> FromFile(<span class="hljs-string">'meduim.jpeg'</span>), <span class="hljs-keyword">new</span> MozJPEG())
+    )
+    .execute()</code></pre>
+				<p>For API documentation please reffer our <a href="https://imazen.github.io/imageflow-node/">documentation</a>.</p>
 				<a href="#local-setup" id="local-setup" style="color: inherit; text-decoration: none;">
 					<h2>Local Setup</h2>
 				</a>
