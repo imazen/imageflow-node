@@ -11,7 +11,6 @@ import {
     CropWhitespace,
     FillRect,
     ExpandCanvas,
-    IOData,
     Direction,
     Watermark,
     WatermarkOption,
@@ -29,12 +28,10 @@ import {
     CopyRectangle,
     BaseStep,
     IOOperation,
+    ReSample,
+    Commandstring,
 } from './types'
 import { NativeJob } from './job'
-
-import * as fs from 'fs'
-
-const str = require('stream-promise')
 
 export class Steps {
     private graph: Graph
@@ -352,6 +349,21 @@ export class Steps {
         this.last = this.vertex.length - 1
         return this
     }
+    command(value: string) {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new Commandstring(value))
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
+
+    distort(w: number, h: number, hint: ConstraintHints | null = null) {
+        this.graph.addVertex(this.vertex.length)
+        this.vertex.push(new ReSample(w, h, hint))
+        this.graph.addEdge(this.vertex.length - 1, this.last)
+        this.last = this.vertex.length - 1
+        return this
+    }
 }
 
 interface edge {
@@ -359,7 +371,7 @@ interface edge {
     type: string
 }
 
-export class Graph {
+class Graph {
     _internal: Map<number, Array<edge>> = new Map()
 
     addVertex(vertex: number) {
