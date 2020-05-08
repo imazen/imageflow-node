@@ -68,25 +68,25 @@ console.log(output.key)
 const { MozJPEG, Steps, FromStream, FromFile } = require('@imazen/imageflow')
 
 const test = new Steps(new FromStream(req))
-    .constraintWithin(800, 800)
-    .branch((step) => step.encode(new FromFile('large.jpeg'), new MozJPEG()))
+    .constrainWithin(800, 800)
+    .branch((step) => step.encode(new FromFile('large.jpg'), new MozJPEG()))
     .branch((step) =>
         step
-            .constraintWithin(400, 400)
+            .constrainWithin(400, 400)
             .branch((step) =>
                 step
-                    .constraintWithin(200, 200)
+                    .constrainWithin(200, 200)
                     .branch((step) =>
                         step
-                            .constraintWithin(100, 100)
+                            .constrainWithin(100, 100)
                             .encode(
-                                new FromFile('extra_small.jpeg'),
+                                new FromFile('tiny.jpg'),
                                 new MozJPEG()
                             )
                     )
-                    .encode(new FromFile('small.jpeg'), new MozJPEG())
+                    .encode(new FromFile('small.jpg'), new MozJPEG())
             )
-            .encode(new FromFile('meduim.jpeg'), new MozJPEG())
+            .encode(new FromFile('medium.jpg'), new MozJPEG())
     )
     .execute()
 ```
