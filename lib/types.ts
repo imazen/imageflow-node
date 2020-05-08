@@ -172,7 +172,7 @@ export class Encode implements BaseStep {
         return {
             encode: {
                 io_id: this.io_id,
-                preset: this.preset.toPreset(),
+                preset: this.preset?.toPreset(),
             },
         }
     }
@@ -376,7 +376,7 @@ export class RegionPercentage implements BaseStep {
     private readonly y1: number
     private readonly x2: number
     private readonly y2: number
-    private backgroundColor: string
+    private backgroundColor: Colors
     toStep(): Object {
         return {
             region_percent: {
@@ -384,16 +384,20 @@ export class RegionPercentage implements BaseStep {
                 y1: this.y1,
                 x2: this.x2,
                 y2: this.y2,
-                background_color: this.backgroundColor,
+                background_color: this.backgroundColor.toColor(),
             },
         }
     }
 
-    constructor({ x1, y1, x2, y2 }: FitBoxCoordinates) {
+    constructor(
+        { x1, y1, x2, y2 }: FitBoxCoordinates,
+        backgroundColor: Colors
+    ) {
         this.x1 = x1
         this.y2 = y2
         this.x2 = x2
         this.y1 = y1
+        this.backgroundColor = backgroundColor
     }
 }
 
@@ -402,7 +406,7 @@ export class Region implements BaseStep {
     private readonly y1: number
     private readonly x2: number
     private readonly y2: number
-    private backgroundColor: string
+    private backgroundColor: Colors
     toStep(): Object {
         return {
             region: {
@@ -410,16 +414,20 @@ export class Region implements BaseStep {
                 y1: this.y1,
                 x2: this.x2,
                 y2: this.y2,
-                background_color: this.backgroundColor,
+                background_color: this.backgroundColor.toColor(),
             },
         }
     }
 
-    constructor({ x1, y1, x2, y2 }: FitBoxCoordinates) {
+    constructor(
+        { x1, y1, x2, y2 }: FitBoxCoordinates,
+        backgroundColor: Colors
+    ) {
         this.x1 = x1
         this.y2 = y2
         this.x2 = x2
         this.y1 = y1
+        this.backgroundColor = backgroundColor
     }
 }
 
@@ -471,7 +479,7 @@ export class FlipV implements BaseStep {
 
 export class FlipH implements BaseStep {
     toStep(): string {
-        return 'flip_H'
+        return 'flip_h'
     }
 }
 
@@ -480,7 +488,7 @@ export class FillRect implements BaseStep {
     private readonly x2: number
     private readonly y1: number
     private readonly y2: number
-    private readonly color: string
+    private readonly color: Colors
     toStep(): Object {
         return {
             fill_rect: {
@@ -488,12 +496,12 @@ export class FillRect implements BaseStep {
                 y1: this.y1,
                 x2: this.x2,
                 y2: this.y2,
-                color: this.color,
+                color: this.color?.toColor(),
             },
         }
     }
 
-    constructor(x1: number, y1: number, x2: number, y2: number, color: string) {
+    constructor(x1: number, y1: number, x2: number, y2: number, color: Colors) {
         this.x1 = x1
         this.x2 = x2
         this.y1 = y1
@@ -503,7 +511,7 @@ export class FillRect implements BaseStep {
 }
 
 export abstract class Colors {
-    abstract toColor(): Object
+    abstract toColor(): Object | string
 }
 
 export enum ColorType {
@@ -524,6 +532,18 @@ export class SRGBColor implements Colors {
     constructor(type: ColorType, value: string) {
         this.type = type
         this.value = value
+    }
+}
+
+export class TransparentColor implements Colors {
+    toColor(): string {
+        return 'tranparent'
+    }
+}
+
+export class BlackColor implements Colors {
+    toColor(): string {
+        return 'black'
     }
 }
 
@@ -654,11 +674,11 @@ export class Watermark implements BaseStep {
         return {
             watermark: {
                 io_id: this.ioID,
-                gravity: this.gravity.toGravity(),
+                gravity: this.gravity?.toGravity(),
                 fit_mode: this.fitMode,
-                fit_box: this.fitBox.toFitBox(),
+                fit_box: this.fitBox?.toFitBox(),
                 opacity: this.opacity,
-                hints: this.hint.toHint(),
+                hints: this.hint?.toHint(),
             },
         }
     }
@@ -679,8 +699,8 @@ export class Watermark implements BaseStep {
 
 export class Commandstring implements BaseStep {
     private readonly command: string
-    private readonly encode: number
-    private readonly decode: number
+    private readonly encode: number | null
+    private readonly decode: number | null
     toStep(): Object {
         return {
             command_string: {
@@ -692,7 +712,11 @@ export class Commandstring implements BaseStep {
         }
     }
 
-    constructor(command: string, encode: number, decode: number) {
+    constructor(
+        command: string,
+        encode: number | null = null,
+        decode: number | null = null
+    ) {
         this.command = command
         this.decode = decode
         this.encode = encode
@@ -721,7 +745,7 @@ export enum ColorFilterSRGBType {
 }
 
 export enum ColorFilterSRGBValueType {
-    Alpha = 'aplha',
+    Alpha = 'alpha',
     Contrast = 'contrast',
     Brightness = 'brightness',
 }
@@ -782,7 +806,7 @@ export class DrawExactImageTo implements BaseStep {
                 w: this.w,
                 h: this.h,
                 blend: this.blend,
-                hints: this.hint.toHint(),
+                hints: this.hint?.toHint(),
             },
         }
     }
@@ -905,7 +929,7 @@ export class FromStream implements IOOperation {
         this.direction = direction
     }
     get ioID(): number {
-        return this.ioID
+        return this.ioId
     }
     async toOutput(buffer: ArrayBuffer, collector: Object): Promise<any> {
         this.internalStream.end(Buffer.from(buffer))
@@ -937,10 +961,10 @@ export class FromBuffer implements IOOperation {
         this.direction = direction
     }
     get ioID(): number {
-        return this.ioID
+        return this.ioId
     }
     async toOutput(buffer: ArrayBuffer, collector: Object): Promise<any> {
-        collector[this.key] = buffer
+        collector[this.key] = Buffer.from(buffer)
     }
 }
 
@@ -975,5 +999,26 @@ export class FromURL implements IOOperation {
 
     async toOutput(buffer: ArrayBuffer, collector: Object) {
         await axios.post(this.url, Buffer.from(buffer))
+    }
+}
+
+export class ReSample implements BaseStep {
+    private w: number
+    private h: number
+    private hint: ConstraintHints | null
+    toStep(): Object {
+        return {
+            resample_2d: {
+                w: this.w,
+                h: this.h,
+                hints: this.hint?.toHint(),
+            },
+        }
+    }
+
+    constructor(w: number, h: number, hint: ConstraintHints | null = null) {
+        this.w = w
+        this.h = h
+        this.hint = hint
     }
 }

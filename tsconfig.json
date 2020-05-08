@@ -9,13 +9,13 @@
         "declaration": true,
         "outDir": "./dist",
         "target": "es6",
-        "suppressImplicitAnyIndexErrors": true,
+        "suppressImplicitAnyIndexErrors": true
     },
-    "include": [
-        "lib/**/*"
-    ],
-    "exclude": [
-        "**/node_modules",
-        "**/*.spec.ts"
-    ]
+    "include": ["lib/**/*"],
+    "exclude": ["**/node_modules", "**/*.spec.ts","**/*.d.ts"],
+    "typedocOptions": {
+        "mode": "library",
+        "out": "docs",
+        "exclude":"native"
+    }
 }
