@@ -12,8 +12,10 @@
 ^imageflow_server/src/assets/
 ^\.github/actions/spell-check/
 ^\.gitignore$
-/\.idea
-/\.yarn
+(?:^|/)\.idea/
+(?:^|/)\.yarn/
+yarn-1.19.0.js$
 \.node$
-/node_modules/
+(?:^|/)node_modules/
+(?:^|/)dist/
 
