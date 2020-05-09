@@ -22,7 +22,7 @@ import {
     ColorFilterSRGBValue,
     ColorFilterSRGBValueType,
     DrawExactImageTo,
-    DrawExactImageToCoordinate,
+    DrawExactImageToCoordinates,
     ConstrainHints,
     CompositingMode,
     CopyRectangle,
@@ -71,12 +71,12 @@ export class Steps {
         this.ioID++
         return this
     }
-    constrain(constarint: Constrain): Steps {
+    constrain(constraint: Constrain): Steps {
         if (!this.decodeValue)
             throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
 
-        this.vertex.push(constarint)
+        this.vertex.push(constraint)
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
         return this
@@ -99,9 +99,9 @@ export class Steps {
         return this
     }
 
-    drawImageExacTo(
+    drawImageExactTo(
         f: (arg: Steps) => any,
-        cordinate: DrawExactImageToCoordinate,
+        coordinates: DrawExactImageToCoordinates,
         blend: CompositingMode,
         hint: ConstrainHints
     ) {
@@ -111,7 +111,7 @@ export class Steps {
             throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
 
-        this.vertex.push(new DrawExactImageTo(cordinate, blend, hint))
+        this.vertex.push(new DrawExactImageTo(coordinates, blend, hint))
         this.graph.addEdge(this.vertex.length - 1, last, 'input')
         this.graph.addEdge(this.vertex.length - 1, this.last, 'canvas')
         this.last = this.vertex.length - 1
@@ -298,7 +298,7 @@ export class Steps {
         return this
     }
 
-    colorFilterIvert(): Steps {
+    colorFilterInvert(): Steps {
         if (!this.decodeValue)
             throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
@@ -320,7 +320,7 @@ export class Steps {
         return this
     }
 
-    colorFilterGraycaleBt709(): Steps {
+    colorFilterGrayscaleBt709(): Steps {
         if (!this.decodeValue)
             throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
@@ -418,9 +418,9 @@ export class Steps {
     }
     copyRectangle(
         f: (args: Steps) => any,
-        cordinate: DrawExactImageToCoordinate,
+        coordinates: DrawExactImageToCoordinates,
         fromX: number,
-        fromy: number
+        fromY: number
     ) {
         let last = this.last
         f(this)
@@ -428,7 +428,7 @@ export class Steps {
             throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
 
-        this.vertex.push(new CopyRectangle(cordinate, fromX, fromy))
+        this.vertex.push(new CopyRectangle(coordinates, fromX, fromY))
         this.graph.addEdge(this.vertex.length - 1, last, 'input')
         this.graph.addEdge(this.vertex.length - 1, this.last, 'canvas')
         this.last = this.vertex.length - 1
@@ -446,7 +446,7 @@ export class Steps {
     }
 
     async executeCommand(
-        commadValue: string,
+        commandValue: string,
         input: IOOperation,
         output: IOOperation
     ): Promise<any> {
@@ -456,7 +456,7 @@ export class Steps {
         job.addOutputBuffer(1)
         let s = JSON.stringify({
             framewise: {
-                steps: [new CommandString(commadValue, 1, 0).toStep()],
+                steps: [new CommandString(commandValue, 1, 0).toStep()],
             },
         })
         await job.message('v0.1/execute', s)
@@ -494,7 +494,7 @@ class Graph {
 
     addEdge(to: number, from: number, type: string = 'input') {
         if (!this._internal.has(from) || !this._internal.has(to))
-            throw new Error('vertext not found in graph')
+            throw new Error('vertex not found in graph')
         this._internal.get(from).push({ to, type })
     }
 

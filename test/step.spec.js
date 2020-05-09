@@ -55,7 +55,7 @@ describe('basic', () => {
             .constrainWithin(5, 5)
             .branch((step) =>
                 step
-                    .drawImageExacTo(
+                    .drawImageExactTo(
                         (step) => step.decode(new FromBuffer(str)),
                         {
                             w: 10,
@@ -90,8 +90,8 @@ it('should be able perform all operations', async () => {
         .cropWhiteSpcae(new CropWhitespace(80, 10))
         .colorFilterAlpha(0.9)
         .colorFilterBrightness(0.8)
-        .colorFilterIvert()
-        .colorFilterGraycaleBt709()
+        .colorFilterInvert()
+        .colorFilterGrayscaleBt709()
         .colorFilterGrayscaleFlat()
         .colorFilterGrayscaleRY()
         .encode(new FromBuffer(null, 'key'), new MozJPEG())
