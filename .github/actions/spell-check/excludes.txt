@@ -3,9 +3,17 @@
 /perf\.data$
 /\.rakeTasks$
 \.jpg$
+\.png$
+\.gif$
 \.props$
+\.lock$
 ^appveyor\.yml$
 ^imageflow_core/tests/visuals\.rs$
 ^imageflow_server/src/assets/
 ^\.github/actions/spell-check/
 ^\.gitignore$
+/\.idea
+/\.yarn
+\.node$
+/node_modules/
+
