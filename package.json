@@ -1,6 +1,6 @@
 {
   "name": "@imazen/imageflow",
-  "version": "0.0.1-rc1",
+  "version": "0.0.1-rc2",
   "description": "Modify and optimize images at lightspeed",
   "main": "dist/index.js",
   "type": "dist/index.d.ts",
