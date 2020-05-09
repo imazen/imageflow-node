@@ -227,6 +227,14 @@ step.encode(<span class="hljs-keyword">new</span> FromBuffer(<span class="hljs-l
     .execute()
     .then(<span class="hljs-built_in">console</span>.log)
     .catch(<span class="hljs-built_in">console</span>.log)</code></pre>
+				<ol start="7">
+					<li>Using query style commands </li>
+				</ol>
+				<pre><code class="language-js"><span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> Steps().executeCommand(
+        <span class="hljs-string">'width=100&amp;height=100&amp;mode=max'</span>,
+        <span class="hljs-keyword">new</span> FromBuffer(str),
+        <span class="hljs-keyword">new</span> FromBuffer(<span class="hljs-literal">null</span>, <span class="hljs-string">'key'</span>)
+    )</code></pre>
 				<a href="#local-setup" id="local-setup" style="color: inherit; text-decoration: none;">
 					<h2>Local Setup</h2>
 				</a>
