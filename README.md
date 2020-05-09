@@ -179,6 +179,16 @@ step.encode(new FromBuffer(null, 'key'), new MozJPEG(80))
     .catch(console.log)
 ```
 
+7. Using query style commands 
+
+```js
+await new Steps().executeCommand(
+        'width=100&height=100&mode=max',
+        new FromBuffer(str),
+        new FromBuffer(null, 'key')
+    )
+```
+
 ## Local Setup
 
 ```bash

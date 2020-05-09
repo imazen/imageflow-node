@@ -14,7 +14,7 @@ import {
     Direction,
     Watermark,
     WatermarkOption,
-    PresetInterface,
+    Preset,
     FlipH,
     FlipV,
     ColorFilterSRGB,
@@ -29,7 +29,7 @@ import {
     BaseStep,
     IOOperation,
     ReSample,
-    Commandstring,
+    CommandString,
 } from './types'
 import { NativeJob } from './job'
 
@@ -40,38 +40,52 @@ export class Steps {
     private inputs: Array<IOOperation> = []
     private outputs: Array<IOOperation> = []
     private last = 0
+    private decodeValue: boolean
 
-    constructor(operation: IOOperation) {
+    constructor(operation: IOOperation = null) {
         this.graph = new Graph()
         this.ioID = 0
-        operation.setIOID(this.ioID, Direction.in)
-        const decode = new Decode(this.ioID)
-        this.inputs.push(operation)
-        this.vertex.push(decode)
-        this.graph.addVertex(0)
-        this.last = 0
-        this.ioID++
+        if (operation) {
+            operation.setIOID(this.ioID, Direction.in)
+            const decode = new Decode(this.ioID)
+            this.inputs.push(operation)
+            this.vertex.push(decode)
+            this.graph.addVertex(0)
+            this.last = 0
+            this.ioID++
+            this.decodeValue = true
+        } else {
+            this.decodeValue = false
+        }
     }
 
     decode(operation: IOOperation) {
+        this.decodeValue = true
         operation.setIOID(this.ioID, Direction.in)
         const decode = new Decode(this.ioID)
         this.inputs.push(operation)
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(decode)
         this.last = this.vertex.length - 1
         this.ioID++
         return this
     }
     constrain(constarint: Constrain): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(constarint)
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
         return this
     }
     constrainWithin(width: number, hieght: number): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new Constrain(ConstrainMode.Within, width, hieght))
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -93,7 +107,10 @@ export class Steps {
     ) {
         let last = this.last
         f(this)
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new DrawExactImageTo(cordinate, blend, hint))
         this.graph.addEdge(this.vertex.length - 1, last, 'input')
         this.graph.addEdge(this.vertex.length - 1, this.last, 'canvas')
@@ -102,6 +119,8 @@ export class Steps {
     }
 
     async execute(): Promise<Object> {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         let job = new NativeJob()
         let files = await Promise.all(
             this.inputs.map(async (ioData) => {
@@ -142,7 +161,10 @@ export class Steps {
         return collector
     }
     rotate90(): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new Rotate90())
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -150,7 +172,10 @@ export class Steps {
     }
 
     rotate180(): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new Rotate180())
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -158,7 +183,10 @@ export class Steps {
     }
 
     rotate270(): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new Rotate270())
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -166,7 +194,10 @@ export class Steps {
     }
 
     rotate(rotate: Rotate180 | Rotate270 | Rotate90): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(rotate)
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -174,14 +205,20 @@ export class Steps {
     }
 
     region(regionData: Region | RegionPercentage): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(regionData)
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
         return this
     }
     cropWhiteSpcae(data: CropWhitespace): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(data)
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -189,7 +226,10 @@ export class Steps {
     }
 
     fillRect(data: FillRect): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(data)
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -197,7 +237,10 @@ export class Steps {
     }
 
     expandCanvas(data: ExpandCanvas): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(data)
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -205,7 +248,10 @@ export class Steps {
     }
 
     flipHorizontal(): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new FlipH())
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -213,7 +259,10 @@ export class Steps {
     }
 
     flipVertical(): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new FlipV())
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -222,7 +271,10 @@ export class Steps {
 
     watermark(operation: IOOperation, watermarkOption: WatermarkOption): Steps {
         operation.setIOID(this.ioID, Direction.in)
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.inputs.push(operation)
         this.vertex.push(new Watermark(this.ioID, watermarkOption))
         this.graph.addEdge(this.vertex.length - 1, this.last)
@@ -231,11 +283,14 @@ export class Steps {
         return this
     }
 
-    encode(operation: IOOperation, decodeData: PresetInterface): Steps {
+    encode(operation: IOOperation, decodeData: Preset): Steps {
         operation.setIOID(this.ioID, Direction.out)
         const encoder = new Encode(decodeData, this.ioID)
         this.outputs.push(operation)
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(encoder)
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -244,7 +299,10 @@ export class Steps {
     }
 
     colorFilterIvert(): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new ColorFilterSRGB(ColorFilterSRGBType.Invert))
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -252,7 +310,10 @@ export class Steps {
     }
 
     colorFilterGrayscaleRY(): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new ColorFilterSRGB(ColorFilterSRGBType.GrayscaleRY))
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -260,7 +321,10 @@ export class Steps {
     }
 
     colorFilterGraycaleBt709(): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(
             new ColorFilterSRGB(ColorFilterSRGBType.GrayscaleBt709)
         )
@@ -270,7 +334,10 @@ export class Steps {
     }
 
     colorFilterGrayscaleFlat(): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new ColorFilterSRGB(ColorFilterSRGBType.GrayscaleFlat))
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -278,7 +345,10 @@ export class Steps {
     }
 
     colorFilterGrayscaleNtsc(): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new ColorFilterSRGB(ColorFilterSRGBType.GrayscaleNtsc))
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -286,7 +356,10 @@ export class Steps {
     }
 
     colorFilterAlpha(value: number): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(
             new ColorFilterSRGB(
                 new ColorFilterSRGBValue(value, ColorFilterSRGBValueType.Alpha)
@@ -298,7 +371,10 @@ export class Steps {
     }
 
     colorFilterBrightness(value: number): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(
             new ColorFilterSRGB(
                 new ColorFilterSRGBValue(
@@ -313,7 +389,10 @@ export class Steps {
     }
 
     colorFilterContrast(value: number): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(
             new ColorFilterSRGB(
                 new ColorFilterSRGBValue(
@@ -328,7 +407,10 @@ export class Steps {
     }
 
     colorFilter(value: ColorFilterSRGBValue) {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new ColorFilterSRGB(value))
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
@@ -342,23 +424,53 @@ export class Steps {
     ) {
         let last = this.last
         f(this)
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new CopyRectangle(cordinate, fromX, fromy))
         this.graph.addEdge(this.vertex.length - 1, last, 'input')
         this.graph.addEdge(this.vertex.length - 1, this.last, 'canvas')
         this.last = this.vertex.length - 1
         return this
     }
-    command(value: string) {
+    command(value: string): Steps {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
-        this.vertex.push(new Commandstring(value))
+
+        this.vertex.push(new CommandString(value))
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
         return this
     }
 
+    async executeCommand(
+        commadValue: string,
+        input: IOOperation,
+        output: IOOperation
+    ): Promise<any> {
+        let job = new NativeJob()
+        const value = await input.toIOBuffer()
+        job.addInputBytes(0, value)
+        job.addOutputBuffer(1)
+        let s = JSON.stringify({
+            framewise: {
+                steps: [new CommandString(commadValue, 1, 0).toStep()],
+            },
+        })
+        await job.message('v0.1/execute', s)
+        let collector = {}
+        let buffer = job.getOutputBufferBytes(1)
+        await output.toOutput(buffer, collector)
+        return collector
+    }
+
     distort(w: number, h: number, hint: ConstrainHints | null = null) {
+        if (!this.decodeValue)
+            throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
+
         this.vertex.push(new ReSample(w, h, hint))
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1

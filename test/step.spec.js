@@ -2,7 +2,7 @@ const {
     Steps,
     FromBuffer,
     MozJPEG,
-    FromURL,
+    FromFile,
     FillRect,
     BlackColor,
     Rotate90,
@@ -96,5 +96,14 @@ it('should be able perform all operations', async () => {
         .colorFilterGrayscaleRY()
         .encode(new FromBuffer(null, 'key'), new MozJPEG())
         .execute()
+    expect(job.key).toBeInstanceOf(Buffer)
+})
+
+it('should be able execute command string', async () => {
+    let job = await new Steps().executeCommand(
+        'width=100&height=100&mode=max',
+        new FromBuffer(str),
+        new FromBuffer(null, 'key')
+    )
     expect(job.key).toBeInstanceOf(Buffer)
 })

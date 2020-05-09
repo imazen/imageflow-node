@@ -60,7 +60,7 @@ export class Decode implements BaseStep {
     }
 }
 
-abstract class Preset {
+export abstract class Preset {
     abstract toPreset(): Object | string
 }
 
@@ -161,12 +161,8 @@ export class WebPLossless implements Preset {
     }
 }
 
-export interface PresetInterface {
-    toPreset(): Object | string
-}
-
 export class Encode implements BaseStep {
-    private preset: PresetInterface
+    private preset: Preset
     private readonly io_id: number
     toStep(): Object {
         return {
@@ -177,7 +173,7 @@ export class Encode implements BaseStep {
         }
     }
 
-    constructor(preset: PresetInterface, ioId: number) {
+    constructor(preset: Preset, ioId: number) {
         this.io_id = ioId
         this.preset = preset
     }
@@ -591,8 +587,8 @@ enum FitMode {
     FitCrop = 'fit_crop',
 }
 
-interface FitBox {
-    toFitBox(): Object
+abstract class FitBox {
+    abstract toFitBox(): Object
 }
 
 interface FitBoxCoordinates {
@@ -602,7 +598,7 @@ interface FitBoxCoordinates {
     y2: number
 }
 
-export class FitBoxPercentage {
+export class FitBoxPercentage implements FitBox {
     private readonly x1: number
     private readonly y1: number
     private readonly x2: number
@@ -626,7 +622,7 @@ export class FitBoxPercentage {
     }
 }
 
-export class FitBoxMargin {
+export class FitBoxMargin implements FitBox {
     private readonly left: number
     private readonly top: number
     private readonly right: number
@@ -697,7 +693,7 @@ export class Watermark implements BaseStep {
     }
 }
 
-export class Commandstring implements BaseStep {
+export class CommandString implements BaseStep {
     private readonly command: string
     private readonly encode: number | null
     private readonly decode: number | null
@@ -706,8 +702,8 @@ export class Commandstring implements BaseStep {
             command_string: {
                 kind: 'ir4',
                 value: this.command,
-                decode: this.encode,
-                encode: this.decode,
+                decode: this.decode,
+                encode: this.encode,
             },
         }
     }
