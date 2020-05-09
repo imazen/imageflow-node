@@ -81,12 +81,12 @@ export class Steps {
         this.last = this.vertex.length - 1
         return this
     }
-    constrainWithin(width: number, hieght: number): Steps {
+    constrainWithin(width: number, height: number): Steps {
         if (!this.decodeValue)
             throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)
 
-        this.vertex.push(new Constrain(ConstrainMode.Within, width, hieght))
+        this.vertex.push(new Constrain(ConstrainMode.Within, width, height))
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
         return this
@@ -214,7 +214,7 @@ export class Steps {
         this.last = this.vertex.length - 1
         return this
     }
-    cropWhiteSpcae(data: CropWhitespace): Steps {
+    cropWhiteSpace(data: CropWhitespace): Steps {
         if (!this.decodeValue)
             throw new Error('decode must be the first node in graph')
         this.graph.addVertex(this.vertex.length)

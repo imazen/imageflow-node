@@ -44,7 +44,7 @@ if (platform) {
         .then(function (response) {
             response.data.pipe(fs.createWriteStream('./native/index.node'))
         }).catch(() => {
-            throw "Unable to download the requied binary"
+            throw "Unable to download the required binary"
         });
 } else {
     try {

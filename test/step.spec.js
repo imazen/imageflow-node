@@ -87,7 +87,7 @@ it('should be able perform all operations', async () => {
         .region(new Region({ x1: 0, y1: 0, x2: 8, y2: 8 }, new BlackColor()))
         .watermark(new FromBuffer(str), {})
         .command('width=100&height=100&mode=max')
-        .cropWhiteSpcae(new CropWhitespace(80, 10))
+        .cropWhiteSpace(new CropWhitespace(80, 10))
         .colorFilterAlpha(0.9)
         .colorFilterBrightness(0.8)
         .colorFilterInvert()

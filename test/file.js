@@ -51,13 +51,13 @@ const test = new Steps(new FromFile('./test/test.jpg'))
                         step
                             .constraintWithin(100, 100)
                             .encode(
-                                new FromFile('extra_small.jpeg'),
+                                new FromFile('performing.jpeg'),
                                 new MozJPEG()
                             )
                     )
                     .encode(new FromFile('small.jpeg'), new MozJPEG())
             )
-            .encode(new FromFile('meduim.jpeg'), new MozJPEG())
+            .encode(new FromFile('medium.jpeg'), new MozJPEG())
     )
     .execute()
 
