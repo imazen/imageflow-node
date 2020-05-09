@@ -29,9 +29,9 @@ describe('basic', () => {
         expect(job.key).toBeInstanceOf(Buffer)
     })
 
-    it('should be able to constraint', async () => {
+    it('should be able to constrain', async () => {
         let job = await new Steps(new FromBuffer(str))
-            .constraintWithin(5, 5)
+            .constrainWithin(5, 5)
             .encode(new FromBuffer(null, 'key'), new MozJPEG())
             .execute()
         expect(job.key).toBeInstanceOf(Buffer)
@@ -52,7 +52,7 @@ describe('basic', () => {
 
     it('should be able to create a canvas', async () => {
         let job = await new Steps(new FromBuffer(str))
-            .constraintWithin(5, 5)
+            .constrainWithin(5, 5)
             .branch((step) =>
                 step
                     .drawImageExacTo(
@@ -75,7 +75,7 @@ describe('basic', () => {
 
 it('should be able perform all operations', async () => {
     let job = await new Steps(new FromBuffer(str))
-        .constraintWithin(100, 100)
+        .constrainWithin(100, 100)
         .distort(10, 10)
         .fillRect(new FillRect(0, 0, 8, 8, new BlackColor()))
         .flipVertical()

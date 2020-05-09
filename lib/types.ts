@@ -237,7 +237,7 @@ enum ScalingFloatspace {
     Linear = 'linear',
 }
 
-interface ConstraintHintsOptions {
+interface ConstrainHintsOptions {
     downFilter?: Filter
     upFilter?: Filter
     scalingColorScape?: ScalingFloatspace
@@ -245,7 +245,7 @@ interface ConstraintHintsOptions {
     sharpenWhen?: SharpenWhen
 }
 
-export class ConstraintHints {
+export class ConstrainHints {
     private readonly sharpenPercent: number
     private downFilter: Filter | null
     private upFilter: Filter | null
@@ -272,7 +272,7 @@ export class ConstraintHints {
             scalingColorScape,
             resampleWhen,
             sharpenWhen,
-        }: ConstraintHintsOptions = {}
+        }: ConstrainHintsOptions = {}
     ) {
         this.sharpenPercent = sharpenPercent
         this.downFilter = downFilter
@@ -283,7 +283,7 @@ export class ConstraintHints {
     }
 }
 
-export class ConstraintGravity {
+export class ConstrainGravity {
     private readonly x: number
     private readonly y: number
 
@@ -301,7 +301,7 @@ export class ConstraintGravity {
     }
 }
 
-export enum ConstraintMode {
+export enum ConstrainMode {
     /// ="distort" the image to exactly the given dimensions.
     /// If only one dimension is specified, behaves like `fit`.
     Distort = 'distort',
@@ -327,17 +327,17 @@ export enum ConstraintMode {
     FitPad = 'fit_pad',
 }
 
-interface ConstraintOptions {
+interface ConstrainOptions {
     canvasColor?: string
-    canvasGravity?: ConstraintGravity
-    hints?: ConstraintHints
+    canvasGravity?: ConstrainGravity
+    hints?: ConstrainHints
 }
-export class Constraint implements BaseStep {
-    private hints?: ConstraintHints
+export class Constrain implements BaseStep {
+    private hints?: ConstrainHints
     private readonly width?: number
     private readonly height?: number
-    private gravity?: ConstraintGravity
-    private mode: ConstraintMode
+    private gravity?: ConstrainGravity
+    private mode: ConstrainMode
     private readonly canvasColor?: string
     toStep(): Object {
         return {
@@ -353,14 +353,14 @@ export class Constraint implements BaseStep {
     }
 
     constructor(
-        mode: ConstraintMode,
+        mode: ConstrainMode,
         width: number | null = null,
         height: number | null = null,
         {
             canvasColor = null,
             canvasGravity = null,
             hints = null,
-        }: ConstraintOptions = {}
+        }: ConstrainOptions = {}
     ) {
         this.mode = mode
         this.width = width
@@ -656,20 +656,20 @@ export class FitBoxMargin {
 }
 
 export interface WatermarkOption {
-    gravity: ConstraintGravity
+    gravity: ConstrainGravity
     mode: FitMode
     box: FitBox
     opacity: number
-    hint: ConstraintHints
+    hint: ConstrainHints
 }
 
 export class Watermark implements BaseStep {
     private readonly ioID: number
-    private gravity: ConstraintGravity
+    private gravity: ConstrainGravity
     private readonly fitMode: FitMode
     private fitBox: FitBox
     private readonly opacity: number
-    private hint: ConstraintHints
+    private hint: ConstrainHints
     toStep(): Object {
         return {
             watermark: {
@@ -796,7 +796,7 @@ export class DrawExactImageTo implements BaseStep {
     private h: number
 
     private blend: CompositingMode
-    private hint: ConstraintHints
+    private hint: ConstrainHints
 
     toStep(): Object {
         return {
@@ -814,7 +814,7 @@ export class DrawExactImageTo implements BaseStep {
     constructor(
         { x = 0, y = 0, w = 0, h = 0 }: DrawExactImageToCoordinate,
         blend: CompositingMode,
-        hint: ConstraintHints
+        hint: ConstrainHints
     ) {
         this.x = x
         this.y = y
@@ -1005,7 +1005,7 @@ export class FromURL implements IOOperation {
 export class ReSample implements BaseStep {
     private w: number
     private h: number
-    private hint: ConstraintHints | null
+    private hint: ConstrainHints | null
     toStep(): Object {
         return {
             resample_2d: {
@@ -1016,7 +1016,7 @@ export class ReSample implements BaseStep {
         }
     }
 
-    constructor(w: number, h: number, hint: ConstraintHints | null = null) {
+    constructor(w: number, h: number, hint: ConstrainHints | null = null) {
         this.w = w
         this.h = h
         this.hint = hint

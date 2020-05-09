@@ -1,8 +1,8 @@
 import {
     Decode,
     Encode,
-    Constraint,
-    ConstraintMode,
+    Constrain,
+    ConstrainMode,
     Rotate90,
     Rotate180,
     Rotate270,
@@ -23,7 +23,7 @@ import {
     ColorFilterSRGBValueType,
     DrawExactImageTo,
     DrawExactImageToCoordinate,
-    ConstraintHints,
+    ConstrainHints,
     CompositingMode,
     CopyRectangle,
     BaseStep,
@@ -63,16 +63,16 @@ export class Steps {
         this.ioID++
         return this
     }
-    constraint(constarint: Constraint): Steps {
+    constrain(constarint: Constrain): Steps {
         this.graph.addVertex(this.vertex.length)
         this.vertex.push(constarint)
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
         return this
     }
-    constraintWithin(width: number, hieght: number): Steps {
+    constrainWithin(width: number, hieght: number): Steps {
         this.graph.addVertex(this.vertex.length)
-        this.vertex.push(new Constraint(ConstraintMode.Within, width, hieght))
+        this.vertex.push(new Constrain(ConstrainMode.Within, width, hieght))
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
         return this
@@ -89,7 +89,7 @@ export class Steps {
         f: (arg: Steps) => any,
         cordinate: DrawExactImageToCoordinate,
         blend: CompositingMode,
-        hint: ConstraintHints
+        hint: ConstrainHints
     ) {
         let last = this.last
         f(this)
@@ -357,7 +357,7 @@ export class Steps {
         return this
     }
 
-    distort(w: number, h: number, hint: ConstraintHints | null = null) {
+    distort(w: number, h: number, hint: ConstrainHints | null = null) {
         this.graph.addVertex(this.vertex.length)
         this.vertex.push(new ReSample(w, h, hint))
         this.graph.addEdge(this.vertex.length - 1, this.last)

@@ -32,13 +32,13 @@ const {
 const fs = require('fs')
 
 let step = new Steps(new FromURL('https://jpeg.org/images/jpeg2000-home.jpg'))
-    .constraintWithin(500, 500)
+    .constrainWithin(500, 500)
     .branch((step) =>
         step
-            .constraintWithin(400, 400)
+            .constrainWithin(400, 400)
             .branch((step) =>
                 step
-                    .constraintWithin(200, 200)
+                    .constrainWithin(200, 200)
                     .rotate90()
                     .colorFilterGrayscaleFlat()
                     .encode(new FromFile('./branch_2.jpg'), new MozJPEG(80))
@@ -54,7 +54,7 @@ let step = new Steps(new FromURL('https://jpeg.org/images/jpeg2000-home.jpg'))
             )
             .encode(new FromFile('./branch.jpg'), new MozJPEG(80))
     )
-    .constraintWithin(100, 100)
+    .constrainWithin(100, 100)
     .rotate180()
 step.encode(new FromBuffer(null, 'key'), new MozJPEG(80))
     .execute()
@@ -116,17 +116,17 @@ console.log(output.key)
 const { MozJPEG, Steps, FromStream, FromFile } = require('@imazen/imageflow')
 
 const test = new Steps(new FromStream(req))
-    .constraintWithin(800, 800)
+    .constrainWithin(800, 800)
     .branch((step) => step.encode(new FromFile('large.jpeg'), new MozJPEG()))
     .branch((step) =>
         step
-            .constraintWithin(400, 400)
+            .constrainWithin(400, 400)
             .branch((step) =>
                 step
-                    .constraintWithin(200, 200)
+                    .constrainWithin(200, 200)
                     .branch((step) =>
                         step
-                            .constraintWithin(100, 100)
+                            .constrainWithin(100, 100)
                             .encode(
                                 new FromFile('extra_small.jpeg'),
                                 new MozJPEG()
