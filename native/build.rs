@@ -47,5 +47,6 @@ fn main() {
 
 #[cfg(target_os = "linux")]
 fn main() {
+    println!("building")
     //println!("cargo:rustc-cdylib-link-arg=-undefined");
 }

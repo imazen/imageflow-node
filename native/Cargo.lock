@@ -1057,7 +1057,7 @@ checksum = "9007da9cacbd3e6343da136e98b0d2df013f553d35bdec8b518f07bea768e19c"
 [[package]]
 name = "imageflow_c_components"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.3.8-rc38#49a35cc51345e496e96393a5fa54afa6548a61a4"
+source = "git+https://github.com/imazen/imageflow?rev=d218ae6#d218ae6ee7ccccc585782a8f990a0b69c5479f34"
 dependencies = [
  "cc",
  "glob",
@@ -1070,7 +1070,7 @@ dependencies = [
 [[package]]
 name = "imageflow_core"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.3.8-rc38#49a35cc51345e496e96393a5fa54afa6548a61a4"
+source = "git+https://github.com/imazen/imageflow?rev=d218ae6#d218ae6ee7ccccc585782a8f990a0b69c5479f34"
 dependencies = [
  "blake2-rfc",
  "chashmap",
@@ -1116,7 +1116,7 @@ dependencies = [
 [[package]]
 name = "imageflow_helpers"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.3.8-rc38#49a35cc51345e496e96393a5fa54afa6548a61a4"
+source = "git+https://github.com/imazen/imageflow?rev=d218ae6#d218ae6ee7ccccc585782a8f990a0b69c5479f34"
 dependencies = [
  "app_dirs",
  "backtrace",
@@ -1167,7 +1167,7 @@ dependencies = [
 [[package]]
 name = "imageflow_riapi"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.3.8-rc38#49a35cc51345e496e96393a5fa54afa6548a61a4"
+source = "git+https://github.com/imazen/imageflow?rev=d218ae6#d218ae6ee7ccccc585782a8f990a0b69c5479f34"
 dependencies = [
  "difference",
  "enum_derive",
@@ -1184,7 +1184,7 @@ dependencies = [
 [[package]]
 name = "imageflow_types"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.3.8-rc38#49a35cc51345e496e96393a5fa54afa6548a61a4"
+source = "git+https://github.com/imazen/imageflow?rev=d218ae6#d218ae6ee7ccccc585782a8f990a0b69c5479f34"
 dependencies = [
  "chrono",
  "imageflow_helpers",
