@@ -78,7 +78,7 @@ macro_rules! check_context {
         let e = $context.outward_error();
         if (e.has_error()) {
             let mut undefined: napi_value = std::mem::zeroed();
-            let js_error = create_error($env, "INTERNAL_ERROR", "context alreaqdy have a error");
+            let js_error = create_error($env, "INTERNAL_ERROR", "context already has a error");
             assert_eq!(
                 nodejs_sys::napi_throw($env, js_error),
                 nodejs_sys::napi_status::napi_ok
@@ -385,7 +385,7 @@ struct ThreadSafeFunction(napi_threadsafe_function);
 unsafe impl Send for Context {}
 unsafe impl Send for ThreadSafeFunction {}
 
-pub unsafe extern "C" fn task_compelete(
+pub unsafe extern "C" fn task_complete(
     env: napi_env,
     _js_cb: napi_value,
     ctx: *mut c_void,
@@ -473,7 +473,7 @@ pub unsafe extern "C" fn message(env: napi_env, info: napi_callback_info) -> nap
                 std::ptr::null_mut(),
                 None,
                 deferred as *mut c_void,
-                Some(task_compelete),
+                Some(task_complete),
                 &mut tsfn,
             ),
             napi_status::napi_ok

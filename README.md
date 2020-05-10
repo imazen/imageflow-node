@@ -94,19 +94,19 @@ const output = await new Step(new FromURL('url to image'))
     .execute()
 ```
 
-4. Providing buffer. `FromBuffer` can read and provide the output buffer. To read the output a key should be proivded, which used later to access buffer in the output.
+4. Providing buffer. `FromBuffer` can read and provide the output buffer. To read the output a key should be provided, which used later to access buffer in the output.
 
 ```js
 const { MozJPEG, Steps, FromBuffer } = require('@imazen/imageflow')
 
-const output = await new Step(new FromBuffer(getSoemBuffer()))
+const output = await new Step(new FromBuffer(getSomeBuffer()))
     .colorFilterGrayscaleFlat()
     .encode(new FromBuffer(null, 'key'))
     .execute()
 console.log(output.key)
 ```
 
-5. Perfroming Batch operations. `branch`, `decode` and `encode` are used together to perform batch operation. This example shows how to create varying size images from a single image.
+5. Performing Batch operations. `branch`, `decode`, and `encode` are used together to perform batch operation. This example shows how to create varying size images from a single image.
 
 ```js
 const { MozJPEG, Steps, FromStream, FromFile } = require('@imazen/imageflow')

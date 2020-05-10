@@ -124,7 +124,7 @@ export class LossyPNG implements Preset {
         quality: number,
         minQuality: number,
         speed: number | null = null,
-        maxdeflate: boolean = false
+        maxDeflate: boolean = false
     ) {
         if (quality > 100 || quality < 0)
             throw new Error('invalid quality for preset')
@@ -133,7 +133,7 @@ export class LossyPNG implements Preset {
         if (speed != null && (speed > 10 || speed < 0))
             throw new Error('invalid speed for preset')
         this.quality = quality
-        this.maxDeflate = maxdeflate
+        this.maxDeflate = maxDeflate
         this.speed = speed
         this.minimumQuality = minQuality
     }
@@ -180,37 +180,29 @@ export class Encode implements BaseStep {
 }
 
 enum Filter {
-    RobidouxFast = 'robindoux_fast',
-    Robidoux = 'robindoux',
-    RobidouxSharp = 'robindoux_sharp',
+    RobidouxFast = 'robidoux_fast',
+    Robidoux = 'robidoux',
+    RobidouxSharp = 'robidoux_sharp',
     Ginseng = 'ginseng',
     GinsengSharp = 'ginseng_sharp',
     Lanczos = 'lanczos',
     LanczosSharp = 'lanczos_sharp',
     Lanczos2 = 'lanczos_2',
     Lanczos2Sharp = 'lanczos_2_sharp',
-    CubicFast = 'cubic_fast',
     Cubic = 'cubic',
     CubicSharp = 'cubic_sharp',
     CatmullRom = 'catmull_rom',
     Mitchell = 'mitchell',
 
-    CubicBSpline = 'cubic_B_spline',
+    CubicBSpline = 'cubic_b_spline',
     Hermite = 'hermite',
     Jinc = 'jinc',
-    RawLanczos3 = 'raw_lanczos_3',
-    RawLanczos3Sharp = 'raw_lanczos_3_sharp',
-    RawLanczos2 = 'raw_lanczos_2',
-    RawLanczos2Sharp = 'raw_lanczos_2_sharp',
+
     Triangle = 'triangle',
     Linear = 'linear',
     Box = 'box',
-    CatmullRomFast = 'catmull_rom_fast',
-    CatmullRomFastSharp = 'catmull_rom_fast_sharp',
 
     Fastest = 'fastest',
-
-    MitchellFast = 'mitchell_fast',
     NCubic = 'n_cubic',
     NCubicSharp = 'n_cubic_sharp',
 }
@@ -533,7 +525,7 @@ export class SRGBColor implements Colors {
 
 export class TransparentColor implements Colors {
     toColor(): string {
-        return 'tranparent'
+        return 'transparent'
     }
 }
 
@@ -778,7 +770,7 @@ export class ColorFilterSRGB implements BaseStep {
     }
 }
 
-export interface DrawExactImageToCoordinate {
+export interface DrawExactImageToCoordinates {
     x: number
     y: number
     w: number
@@ -808,7 +800,7 @@ export class DrawExactImageTo implements BaseStep {
     }
 
     constructor(
-        { x = 0, y = 0, w = 0, h = 0 }: DrawExactImageToCoordinate,
+        { x = 0, y = 0, w = 0, h = 0 }: DrawExactImageToCoordinates,
         blend: CompositingMode,
         hint: ConstrainHints
     ) {
@@ -848,7 +840,7 @@ export class CopyRectangle implements BaseStep {
     }
 
     constructor(
-        { x = 0, y = 0, w = 0, h = 0 }: DrawExactImageToCoordinate,
+        { x = 0, y = 0, w = 0, h = 0 }: DrawExactImageToCoordinates,
         fromX: number,
         fromY: number
     ) {
