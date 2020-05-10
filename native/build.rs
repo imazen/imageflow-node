@@ -41,11 +41,11 @@ fn main() {
 
 #[cfg(target_os = "macos")]
 fn main() {
-    println!("cargo:rustc-cdylib-link-arg=-undefined");
+    //println!("cargo:rustc-cdylib-link-arg=-undefined");
     println!("cargo:rustc-cdylib-link-arg=dynamic_lookup");
 }
 
 #[cfg(target_os = "linux")]
 fn main() {
-    println!("cargo:rustc-cdylib-link-arg=-undefined");
+    //println!("cargo:rustc-cdylib-link-arg=-undefined");
 }
