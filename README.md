@@ -65,7 +65,7 @@ step.encode(new FromBuffer(null, 'key'), new MozJPEG(80))
 ```js
 const { MozJPEG, Steps, FromFile } = require('@imazen/imageflow')
 
-const output = await new Step(FromFile('path/to/file'))
+const output = await new Step(new FromFile('path/to/file'))
     .rotate180()
     .encode(new FromFile('./path/to/output/file'))
     .execute()
@@ -76,7 +76,7 @@ const output = await new Step(FromFile('path/to/file'))
 ```js
 const { MozJPEG, Steps, FromStream } = require('@imazen/imageflow')
 
-const output = await new Step(FromStream(req))
+const output = await new Step(new FromStream(req))
     .constrainWithin(400, 400)
     .encode(new FromStream(res))
     .execute()
