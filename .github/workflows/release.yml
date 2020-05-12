@@ -48,7 +48,7 @@ jobs:
               run: cargo build --release
               working-directory: native
             - name: Copy artifacts Linux
-              if: matrix.platform=='ubuntu-latest'
+              if: matrix.platform=='ubuntu-16.04'
               run: cp ./native/target/release/libimageflow_node.so ./libimageflow-${{ matrix.platform }}.node
             - name: Copy artifacts macos
               if: matrix.platform=='macos-latest'
