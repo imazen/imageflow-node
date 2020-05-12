@@ -1,66 +1,66 @@
 name: Release
 
 on:
-  release:
-    types:
-      - published
+    release:
+        types:
+            - published
 jobs:
-  build:
-    strategy:
-      matrix:
-        platform: [windows-latest, ubuntu-latest, macos-latest]
-        node: ["10"]
+    build:
+        strategy:
+            matrix:
+                platform: [windows-latest, ubuntu-16.04, macos-latest]
+                node: ['10']
 
-    runs-on: ${{ matrix.platform }}
+        runs-on: ${{ matrix.platform }}
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node }}
-      - name: Checkout code
-        uses: actions/checkout@master
-      - name: Cache cargo registry
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      - name: Cache cargo index
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo1073325810292-index-${{ hashFiles('**/Cargo.lock') }}
-      - name: Cache cargo build
-        uses: actions/cache@v1
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-      - name: Install llvm
-        if: matrix.platform=='windows-latest'
-        run: choco install -y llvm
-      - name: set environment variables
-        if: matrix.platform=='windows-latest'
-        uses: allenevans/set-env@v1.0.0
-        with:
-          LIBCLANG_PATH: 'C:\Program Files\LLVM\bin'
-      - name: Build
-        run: cargo build --release
-        working-directory: native
-      - name: Copy artifacts Linux
-        if: matrix.platform=='ubuntu-latest'
-        run: cp ./native/target/release/libimageflow_node.so ./libimageflow-${{ matrix.platform }}.node
-      - name: Copy artifacts macos
-        if: matrix.platform=='macos-latest'
-        run: cp ./native/target/release/libimageflow_node.dylib ./libimageflow-${{ matrix.platform }}.node
-      - name: Copy artifacts windows
-        if: matrix.platform=='windows-latest'
-        run: cp ./native/target/release/imageflow_node.dll ./libimageflow-${{ matrix.platform }}.node
-        shell: bash
-      - name: Upload to release
-        uses: Shopify/upload-to-release@master
-        with:
-          name: libimageflow-${{ matrix.platform }}.node
-          path: libimageflow-${{ matrix.platform }}.node
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          content-type: text/plain
+        steps:
+            - uses: actions/checkout@v2
+            - name: Setup node
+              uses: actions/setup-node@v1
+              with:
+                  node-version: ${{ matrix.node }}
+            - name: Checkout code
+              uses: actions/checkout@master
+            - name: Cache cargo registry
+              uses: actions/cache@v1
+              with:
+                  path: ~/.cargo/registry
+                  key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+            - name: Cache cargo index
+              uses: actions/cache@v1
+              with:
+                  path: ~/.cargo/git
+                  key: ${{ runner.os }}-cargo1073325810292-index-${{ hashFiles('**/Cargo.lock') }}
+            - name: Cache cargo build
+              uses: actions/cache@v1
+              with:
+                  path: target
+                  key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+            - name: Install llvm
+              if: matrix.platform=='windows-latest'
+              run: choco install -y llvm
+            - name: set environment variables
+              if: matrix.platform=='windows-latest'
+              uses: allenevans/set-env@v1.0.0
+              with:
+                  LIBCLANG_PATH: 'C:\Program Files\LLVM\bin'
+            - name: Build
+              run: cargo build --release
+              working-directory: native
+            - name: Copy artifacts Linux
+              if: matrix.platform=='ubuntu-latest'
+              run: cp ./native/target/release/libimageflow_node.so ./libimageflow-${{ matrix.platform }}.node
+            - name: Copy artifacts macos
+              if: matrix.platform=='macos-latest'
+              run: cp ./native/target/release/libimageflow_node.dylib ./libimageflow-${{ matrix.platform }}.node
+            - name: Copy artifacts windows
+              if: matrix.platform=='windows-latest'
+              run: cp ./native/target/release/imageflow_node.dll ./libimageflow-${{ matrix.platform }}.node
+              shell: bash
+            - name: Upload to release
+              uses: Shopify/upload-to-release@master
+              with:
+                  name: libimageflow-${{ matrix.platform }}.node
+                  path: libimageflow-${{ matrix.platform }}.node
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  content-type: text/plain
