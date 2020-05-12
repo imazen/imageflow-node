@@ -5,7 +5,7 @@ const child_process = require("child_process")
 
 let OS = {
     darwin: "macos-latest",
-    linux: "ubuntu-latest",
+    linux: "ubuntu-16.04",
     win32: "windows-latest"
 }
 
