@@ -109,9 +109,9 @@ it('should be able execute command string', async () => {
 })
 
 it('should be able perform file save', async () => {
-    let path=__dirname+"./test_@.jpg"
+    let path=__dirname+"/test_@.jpg"
     let job = await new Steps(new FromBuffer(str))
-         .colorFilterInvert()
+        .colorFilterInvert()
         .branch(step=>step.encode(new FromFile(path),new MozJPEG()))
         .encode(new FromBuffer(null, 'key'), new MozJPEG())
         .execute()
