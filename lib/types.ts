@@ -290,7 +290,7 @@ export class ConstrainGravity {
 }
 
 export enum ConstrainMode {
-    /// ="distort" the image to exactly the given dimensions.
+    /// "distort" the image to exactly the given dimensions.
     /// If only one dimension is specified, behaves like `fit`.
     Distort = 'distort',
     /// Ensure the result fits within the provided dimensions. No upscaling.

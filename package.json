@@ -49,7 +49,8 @@
   "homepage": "https://github.com/imazen/imageflow-node#readme",
   "directories": {
     "lib": "lib",
-    "test": "test"
+    "test": "test",
+    "doc": "docs"
   },
   "keywords": [
     "image",
