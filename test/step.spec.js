@@ -107,3 +107,13 @@ it('should be able execute command string', async () => {
     )
     expect(job.key).toBeInstanceOf(Buffer)
 })
+
+it('should be able perform file save', async () => {
+    let path=__dirname+"/test_@.jpg"
+    let job = await new Steps(new FromBuffer(str))
+        .colorFilterInvert()
+        .branch(step=>step.encode(new FromFile(path),new MozJPEG()))
+        .encode(new FromBuffer(null, 'key'), new MozJPEG())
+        .execute()
+    expect(job.key).toBeInstanceOf(Buffer)
+})

@@ -1,6 +1,9 @@
+// https://github.com/Brooooooklyn/napi-rs/blob/master/build/src/lib.rs
+
 #[cfg(target_os = "windows")]
 fn main() {
     // On Windows, we need to download the dynamic library from the nodejs.org website first
+    // https://github.com/nodejs/node-gyp/blob/3bcba2a01ab4a3577fa1a56e543bba138d64d9f1/lib/install.js#L220
     use std::env::var;
     use std::fs::File;
     use std::io::copy;
@@ -30,6 +33,7 @@ fn main() {
     );
     println!("cargo:rustc-link-search={}", temp_dir.to_str().unwrap());
     // Link `win_delay_load_hook.obj` for windows electron
+    // https://www.electronjs.org/docs/tutorial/using-native-node-modules
     let node_runtime_env = "npm_config_runtime";
     println!("cargo:rerun-if-env-changed={}", node_runtime_env);
     if var(node_runtime_env).map(|s| s == "electron") == Ok(true) {
@@ -47,5 +51,6 @@ fn main() {
 
 #[cfg(target_os = "linux")]
 fn main() {
+    println!("building")
     //println!("cargo:rustc-cdylib-link-arg=-undefined");
 }

@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        node: ["10", "12", "13", "14"]
+        node: ["14"]
 
     runs-on: macos-latest
 

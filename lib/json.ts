@@ -122,16 +122,14 @@ export class Steps {
         if (!this.decodeValue)
             throw new Error('decode must be the first node in graph')
         let job = new NativeJob()
-        let files = await Promise.all(
+        await Promise.all(
             this.inputs.map(async (ioData) => {
                 let file = await ioData.toIOBuffer()
                 job.addInputBytes(ioData.ioID, file)
-                return ioData.toIOID()
             })
         )
-        let outputFile = this.outputs.map((ioData) => {
+        this.outputs.forEach((ioData) => {
             job.addOutputBuffer(ioData.ioID)
-            return ioData.toIOID()
         })
         let nodes = this.vertex.reduce<{ [key: string]: any }>(
             (acc: object, step: BaseStep, i: number) => {
@@ -142,7 +140,6 @@ export class Steps {
             {}
         )
         let s = JSON.stringify({
-            io: [...files, ...outputFile],
             framewise: {
                 graph: {
                     nodes: nodes,
@@ -152,7 +149,7 @@ export class Steps {
         })
         await job.message('v0.1/execute', s)
         let collector = {}
-        let buffers = await Promise.all(
+        await Promise.all(
             this.outputs.map(async (ioData) => {
                 let arrayBuffer = job.getOutputBufferBytes(ioData.ioID)
                 return await ioData.toOutput(arrayBuffer, collector)

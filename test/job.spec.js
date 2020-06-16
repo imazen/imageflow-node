@@ -25,7 +25,6 @@ describe('basic', () => {
     job.addInputBytes(0, slice);
 
     let response = job.messageSync("v0.1/get_image_info", JSON.stringify({ io_id: 0 }));
-    console.log(response);
     let result = JSON.parse(response);
     expect(result.success).toEqual(true);
     expect(result.code).toEqual(200);
@@ -61,7 +60,6 @@ describe('basic', () => {
 
     let response = await job.message("v0.1/execute", JSON.stringify(job_task))
     let result = JSON.parse(response);
-    console.log(result);
     expect(result.success).toEqual(true);
     expect(result.code).toEqual(200);
     expect(result.data.job_result.encodes.length).toEqual(1);

@@ -58,3 +58,4 @@ native/artifacts.json
 **/.DS_Store
 build
 docs/
+**/.*
