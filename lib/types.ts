@@ -896,8 +896,8 @@ export class FromFile implements IOOperation {
 export class FromStream implements IOOperation {
     private ioId: number
     private direction: Direction
-    private internalStream: stream.Writable | stream.Readable
-    constructor(str: stream.Writable | stream.Readable) {
+    private internalStream: stream.Stream
+    constructor(str: stream.Stream) {
         this.internalStream = str
     }
 
@@ -920,7 +920,9 @@ export class FromStream implements IOOperation {
         return this.ioId
     }
     async toOutput(buffer: ArrayBuffer, collector: Object): Promise<any> {
-        this.internalStream.end(Buffer.from(buffer))
+        if (this.internalStream instanceof stream.Writable) {
+            this.internalStream.end(Buffer.from(buffer))
+        }
     }
 }
 
