@@ -896,8 +896,8 @@ export class FromFile implements IOOperation {
 export class FromStream implements IOOperation {
     private ioId: number
     private direction: Direction
-    private internalStream: stream.Writable
-    constructor(str: stream.Writable) {
+    private internalStream: stream.Writable | stream.Readable
+    constructor(str: stream.Writable | stream.Readable) {
         this.internalStream = str
     }
 
