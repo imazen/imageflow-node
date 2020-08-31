@@ -921,13 +921,13 @@ export class FromStream implements IOOperation {
     }
     toOutput(buffer: ArrayBuffer, collector: Object): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.internalStream.once('finish', resolve)
-            this.internalStream.once('error', reject);
-
-            const writableStreamRef = this.internalStream as stream.Writable
-            
-            if (typeof writableStreamRef.end === 'function') { // check to see if this is truly writable; readables do not have .end func
-                writableStreamRef.end(Buffer.from(buffer))
+            const asWritable = this.internalStream as stream.Writable
+            if (typeof asWritable.end === 'function') {
+                asWritable.on('finish', resolve)
+                asWritable.on('error', reject)
+                asWritable.end(Buffer.from(buffer))
+            } else {
+                resolve()
             }
         })
     }
