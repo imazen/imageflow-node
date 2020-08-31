@@ -919,10 +919,16 @@ export class FromStream implements IOOperation {
     get ioID(): number {
         return this.ioId
     }
-    async toOutput(buffer: ArrayBuffer, collector: Object): Promise<any> {
-        if (this.internalStream instanceof stream.Writable) {
-            this.internalStream.end(Buffer.from(buffer))
-        }
+    toOutput(buffer: ArrayBuffer, collector: Object): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.internalStream instanceof stream.Writable) {
+                this.internalStream.on('finish', resolve)
+                this.internalStream.on('error', reject)
+                this.internalStream.end(Buffer.from(buffer))
+            } else {
+                resolve()
+            }
+        })
     }
 }
 
