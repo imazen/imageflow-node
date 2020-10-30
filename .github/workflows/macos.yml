@@ -34,8 +34,6 @@ jobs:
         with:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-      - name: Install zlib
-        run: xcode-select --install
       - name: Build
         run: cargo build
         working-directory: native
