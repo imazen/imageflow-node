@@ -13,10 +13,11 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-imageflow_core = { git = "https://github.com/imazen/imageflow", tag="v1.4.10-rc50" }
-imageflow_types = { git = "https://github.com/imazen/imageflow", tag="v1.4.10-rc50" }
+imageflow_core = { git = "https://github.com/imazen/imageflow", tag="v1.4.12-rc52" }
+imageflow_types = { git = "https://github.com/imazen/imageflow", tag="v1.4.12-rc52" }
 nodejs-sys = "0.3.0"
 threadpool = "1.8.0"
+smallvec = "1.4.2"
 
 
 [build-dependencies]

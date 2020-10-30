@@ -98,6 +98,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3441f0f7b02788e948e47f457ca01f1d7e6d92c693bc132c22b087d3141c03ff"
 
 [[package]]
+name = "base64"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
+
+[[package]]
 name = "bindgen"
 version = "0.51.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -681,7 +687,7 @@ version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df004cfca50ef23c36850aaaa59ad52cc70d0e90243c3c7737a4dd32dc7a3c4f"
 dependencies = [
- "quick-error",
+ "quick-error 1.2.3",
 ]
 
 [[package]]
@@ -752,11 +758,12 @@ checksum = "9007da9cacbd3e6343da136e98b0d2df013f553d35bdec8b518f07bea768e19c"
 [[package]]
 name = "imageflow_c_components"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.4.10-rc50#1a7e1eecd8f04cab4413b48c2bf8bd5bbf140f5d"
+source = "git+https://github.com/imazen/imageflow?tag=v1.4.12-rc52#dfa55b76a78f73416aad6f69a30deec1e54d3857"
 dependencies = [
  "cc",
  "glob",
  "lcms2-sys",
+ "libc",
  "libpng-sys",
  "libz-sys",
  "mozjpeg-sys",
@@ -765,7 +772,7 @@ dependencies = [
 [[package]]
 name = "imageflow_core"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.4.10-rc50#1a7e1eecd8f04cab4413b48c2bf8bd5bbf140f5d"
+source = "git+https://github.com/imazen/imageflow?tag=v1.4.12-rc52#dfa55b76a78f73416aad6f69a30deec1e54d3857"
 dependencies = [
  "blake2-rfc",
  "byteorder",
@@ -803,39 +810,40 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "smallvec 1.4.1",
+ "slotmap",
+ "smallvec 1.4.2",
  "threadpool",
  "time 0.2.16",
  "twox-hash",
  "url 1.7.2",
- "uuid 0.7.4",
+ "uuid",
 ]
 
 [[package]]
 name = "imageflow_helpers"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.4.10-rc50#1a7e1eecd8f04cab4413b48c2bf8bd5bbf140f5d"
+source = "git+https://github.com/imazen/imageflow?tag=v1.4.12-rc52#dfa55b76a78f73416aad6f69a30deec1e54d3857"
 dependencies = [
  "backtrace",
- "base64",
+ "base64 0.13.0",
  "blake2-rfc",
  "chrono",
  "digest",
  "fnv",
  "lazy_static",
  "libc",
- "rand 0.7.3",
+ "rand 0.4.6",
  "regex",
  "rustc-serialize",
  "serde",
  "serde_derive",
  "serde_json",
  "sha2",
- "smallvec 1.4.1",
- "time 0.2.16",
+ "smallvec 0.6.13",
+ "time 0.1.43",
  "twox-hash",
  "unicase",
- "uuid 0.8.1",
+ "uuid",
  "zip",
 ]
 
@@ -847,13 +855,14 @@ dependencies = [
  "imageflow_types",
  "nodejs-sys",
  "reqwest",
+ "smallvec 1.4.2",
  "threadpool",
 ]
 
 [[package]]
 name = "imageflow_riapi"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.4.10-rc50#1a7e1eecd8f04cab4413b48c2bf8bd5bbf140f5d"
+source = "git+https://github.com/imazen/imageflow?tag=v1.4.12-rc52#dfa55b76a78f73416aad6f69a30deec1e54d3857"
 dependencies = [
  "enum_derive",
  "ieee754",
@@ -862,20 +871,20 @@ dependencies = [
  "lazy_static",
  "macro-attr",
  "option-filter",
- "time 0.2.16",
- "url 2.1.1",
+ "time 0.1.43",
+ "url 1.7.2",
 ]
 
 [[package]]
 name = "imageflow_types"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.4.10-rc50#1a7e1eecd8f04cab4413b48c2bf8bd5bbf140f5d"
+source = "git+https://github.com/imazen/imageflow?tag=v1.4.12-rc52#dfa55b76a78f73416aad6f69a30deec1e54d3857"
 dependencies = [
  "chrono",
  "imageflow_helpers",
  "imgref",
  "lazy_static",
- "quick-error",
+ "quick-error 2.0.0",
  "regex",
  "rgb",
  "serde",
@@ -1591,6 +1600,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
 
 [[package]]
+name = "quick-error"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ac73b1112776fc109b2e61909bc46c7e1bf0d7f690ffb1676553acce16d5cda"
+
+[[package]]
 name = "quote"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1832,7 +1847,7 @@ version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "12427a5577082c24419c9c417db35cfeb65962efc7675bb6b0d5f1f9d315bfe6"
 dependencies = [
- "base64",
+ "base64 0.12.3",
  "bytes",
  "encoding_rs",
  "futures-core",
@@ -2039,6 +2054,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c111b5bd5695e56cffe5129854aa230b39c93a305372fdbb2668ca2394eea9f8"
 
 [[package]]
+name = "slotmap"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c46a3482db8f247956e464d783693ece164ca056e6e67563ee5505bdb86452cd"
+
+[[package]]
 name = "smallvec"
 version = "0.6.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2049,9 +2070,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.4.1"
+version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3757cb9d89161a2f24e1cf78efa0c1fcff485d18e3f55e0aa3480824ddaa0f3f"
+checksum = "fbee7696b84bbf3d89a1c2eccff0850e3047ed46bfcd2e92c29a2d074d57e252"
 
 [[package]]
 name = "socket2"
@@ -2407,15 +2428,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90dbc611eb48397705a6b0f6e917da23ae517e4d127123d2cf7674206627d32a"
 dependencies = [
  "rand 0.6.5",
-]
-
-[[package]]
-name = "uuid"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fde2f6a4bea1d6e007c4ad38c6839fa71cbb63b6dbf5b595aa38dc9b1093c11"
-dependencies = [
- "rand 0.7.3",
  "sha1",
 ]
 
