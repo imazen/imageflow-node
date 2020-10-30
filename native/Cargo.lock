@@ -832,7 +832,7 @@ dependencies = [
  "fnv",
  "lazy_static",
  "libc",
- "rand 0.4.6",
+ "rand 0.7.3",
  "regex",
  "rustc-serialize",
  "serde",
@@ -840,7 +840,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "smallvec 0.6.13",
- "time 0.1.43",
+ "time 0.2.16",
  "twox-hash",
  "unicase",
  "uuid",
@@ -871,8 +871,8 @@ dependencies = [
  "lazy_static",
  "macro-attr",
  "option-filter",
- "time 0.1.43",
- "url 1.7.2",
+ "time 0.2.16",
+ "url 2.1.1",
 ]
 
 [[package]]
