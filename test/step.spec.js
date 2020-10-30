@@ -1,3 +1,4 @@
+const fs = require('fs')
 const {
     Steps,
     FromBuffer,
@@ -8,21 +9,20 @@ const {
     Rotate90,
     Region,
     CropWhitespace,
+    FromStream,
 } = require('..')
 
-const fs = require('fs')
-
-let str = fs.readFileSync('./test/test.jpg')
+const str = fs.readFileSync('./test/test.jpg')
 
 describe('basic', () => {
     it('should create a steps', async () => {
-        let job = new Steps(new FromBuffer(Buffer.from('')))
+        const job = new Steps(new FromBuffer(Buffer.from('')))
 
         expect(typeof job).toEqual('object')
     })
 
     it('should be able to flip the image', async () => {
-        let job = await new Steps(new FromBuffer(str))
+        const job = await new Steps(new FromBuffer(str))
             .flipVertical()
             .encode(new FromBuffer(null, 'key'), new MozJPEG())
             .execute()
@@ -30,7 +30,7 @@ describe('basic', () => {
     })
 
     it('should be able to constrain', async () => {
-        let job = await new Steps(new FromBuffer(str))
+        const job = await new Steps(new FromBuffer(str))
             .constrainWithin(5, 5)
             .encode(new FromBuffer(null, 'key'), new MozJPEG())
             .execute()
@@ -38,7 +38,7 @@ describe('basic', () => {
     })
 
     it('should be able to  branch the image', async () => {
-        let job = await new Steps(new FromBuffer(str))
+        const job = await new Steps(new FromBuffer(str))
             .branch((step) =>
                 step
                     .colorFilterGrayscaleNtsc()
@@ -51,12 +51,12 @@ describe('basic', () => {
     })
 
     it('should be able to create a canvas', async () => {
-        let job = await new Steps(new FromBuffer(str))
+        const job = await new Steps(new FromBuffer(str))
             .constrainWithin(5, 5)
             .branch((step) =>
                 step
                     .drawImageExactTo(
-                        (step) => step.decode(new FromBuffer(str)),
+                        (steps) => steps.decode(new FromBuffer(str)),
                         {
                             w: 10,
                             h: 10,
@@ -74,7 +74,7 @@ describe('basic', () => {
 })
 
 it('should be able perform all operations', async () => {
-    let job = await new Steps(new FromBuffer(str))
+    const job = await new Steps(new FromBuffer(str))
         .constrainWithin(100, 100)
         .distort(10, 10)
         .fillRect(new FillRect(0, 0, 8, 8, new BlackColor()))
@@ -100,7 +100,7 @@ it('should be able perform all operations', async () => {
 })
 
 it('should be able execute command string', async () => {
-    let job = await new Steps().executeCommand(
+    const job = await new Steps().executeCommand(
         'width=100&height=100&mode=max',
         new FromBuffer(str),
         new FromBuffer(null, 'key')
@@ -109,11 +109,20 @@ it('should be able execute command string', async () => {
 })
 
 it('should be able perform file save', async () => {
-    let path=__dirname+"/test_@.jpg"
-    let job = await new Steps(new FromBuffer(str))
+    const path = `${__dirname}/test_@.jpg`
+    const job = await new Steps(new FromBuffer(str))
         .colorFilterInvert()
-        .branch(step=>step.encode(new FromFile(path),new MozJPEG()))
+        .branch((step) => step.encode(new FromFile(path), new MozJPEG()))
         .encode(new FromBuffer(null, 'key'), new MozJPEG())
         .execute()
     expect(job.key).toBeInstanceOf(Buffer)
+})
+
+it('should be able to read and write from stream', async () => {
+    const path = `${__dirname}/test_@_test.jpg`
+    await new Steps(new FromStream(fs.createReadStream('./test/test.jpg')))
+        .colorFilterInvert()
+        .encode(new FromStream(fs.createWriteStream(path)), new MozJPEG())
+        .execute()
+    expect(fs.readFileSync(path)).toBeInstanceOf(Buffer)
 })
