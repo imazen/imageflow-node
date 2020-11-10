@@ -775,7 +775,7 @@ checksum = "9007da9cacbd3e6343da136e98b0d2df013f553d35bdec8b518f07bea768e19c"
 [[package]]
 name = "imageflow_c_components"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?rev=2616ee2#2616ee27da9692ec333289c6d07cf154af56d0dd"
+source = "git+https://github.com/imazen/imageflow?tag=v1.5.0-rc54#4a570be4513209a60c02d788b2bb2f8a1552d174"
 dependencies = [
  "cc",
  "glob",
@@ -789,7 +789,7 @@ dependencies = [
 [[package]]
 name = "imageflow_core"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?rev=2616ee2#2616ee27da9692ec333289c6d07cf154af56d0dd"
+source = "git+https://github.com/imazen/imageflow?tag=v1.5.0-rc54#4a570be4513209a60c02d788b2bb2f8a1552d174"
 dependencies = [
  "blake2-rfc",
  "byteorder",
@@ -833,13 +833,13 @@ dependencies = [
  "time 0.2.22",
  "twox-hash",
  "url 1.7.2",
- "uuid 0.7.4",
+ "uuid",
 ]
 
 [[package]]
 name = "imageflow_helpers"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?rev=2616ee2#2616ee27da9692ec333289c6d07cf154af56d0dd"
+source = "git+https://github.com/imazen/imageflow?tag=v1.5.0-rc54#4a570be4513209a60c02d788b2bb2f8a1552d174"
 dependencies = [
  "backtrace",
  "base64 0.13.0",
@@ -849,18 +849,18 @@ dependencies = [
  "fnv",
  "lazy_static",
  "libc",
- "rand 0.7.3",
+ "rand 0.4.6",
  "regex",
  "rustc-serialize",
  "serde",
  "serde_derive",
  "serde_json",
  "sha2",
- "smallvec 1.4.2",
- "time 0.2.22",
+ "smallvec 0.6.13",
+ "time 0.1.44",
  "twox-hash",
  "unicase",
- "uuid 0.8.1",
+ "uuid",
  "zip",
 ]
 
@@ -878,7 +878,7 @@ dependencies = [
 [[package]]
 name = "imageflow_riapi"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?rev=2616ee2#2616ee27da9692ec333289c6d07cf154af56d0dd"
+source = "git+https://github.com/imazen/imageflow?tag=v1.5.0-rc54#4a570be4513209a60c02d788b2bb2f8a1552d174"
 dependencies = [
  "enum_derive",
  "ieee754",
@@ -887,14 +887,14 @@ dependencies = [
  "lazy_static",
  "macro-attr",
  "option-filter",
- "time 0.2.22",
- "url 2.1.1",
+ "time 0.1.44",
+ "url 1.7.2",
 ]
 
 [[package]]
 name = "imageflow_types"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?rev=2616ee2#2616ee27da9692ec333289c6d07cf154af56d0dd"
+source = "git+https://github.com/imazen/imageflow?tag=v1.5.0-rc54#4a570be4513209a60c02d788b2bb2f8a1552d174"
 dependencies = [
  "chrono",
  "imageflow_helpers",
@@ -2454,15 +2454,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90dbc611eb48397705a6b0f6e917da23ae517e4d127123d2cf7674206627d32a"
 dependencies = [
  "rand 0.6.5",
-]
-
-[[package]]
-name = "uuid"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fde2f6a4bea1d6e007c4ad38c6839fa71cbb63b6dbf5b595aa38dc9b1093c11"
-dependencies = [
- "rand 0.7.3",
  "sha1",
 ]
 
