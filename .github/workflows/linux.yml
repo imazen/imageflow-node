@@ -1,48 +1,48 @@
 name: Test Linux
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+    push:
+        branches:
+            - main
+    pull_request:
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        platform: [ubuntu-latest, ubuntu-16.04]
-        node: ["14"]
+    build:
+        strategy:
+            matrix:
+                platform: [ubuntu-latest, ubuntu-16.04]
+                node: ['10', '12', '15', '14']
 
-    runs-on: ${{ matrix.platform }}
+        runs-on: ${{ matrix.platform }}
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node }}
-      - name: Cache cargo registry
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      - name: Cache cargo index
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo1073325810292-index-${{ hashFiles('**/Cargo.lock') }}
-      - name: Cache cargo build
-        uses: actions/cache@v1
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-      - name: Build
-        run: cargo build
-        working-directory: native
-      - name: Copy artifacts Linux
-        run: cp ./native/target/debug/libimageflow_node.so ./native/index.node
-      - name: Test
-        run: |
-          yarn
-          yarn build
-          yarn test
+        steps:
+            - uses: actions/checkout@v2
+            - name: Setup node
+              uses: actions/setup-node@v1
+              with:
+                  node-version: ${{ matrix.node }}
+            - name: Cache cargo registry
+              uses: actions/cache@v1
+              with:
+                  path: ~/.cargo/registry
+                  key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+            - name: Cache cargo index
+              uses: actions/cache@v1
+              with:
+                  path: ~/.cargo/git
+                  key: ${{ runner.os }}-cargo1073325810292-index-${{ hashFiles('**/Cargo.lock') }}
+            - name: Cache cargo build
+              uses: actions/cache@v1
+              with:
+                  path: target
+                  key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+            - name: Build
+              run: cargo build
+              working-directory: native
+            - name: Copy artifacts Linux
+              run: cp ./native/target/debug/libimageflow_node.so ./native/index.node
+            - name: Test
+              run: |
+                  yarn
+                  yarn build
+                  yarn test
