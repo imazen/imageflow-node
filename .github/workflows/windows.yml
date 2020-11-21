@@ -37,9 +37,8 @@ jobs:
             - name: Install llvm
               run: choco install -y llvm
             - name: set environment variables
-              uses: allenevans/set-env@v1.0.0
-              with:
-                  LIBCLANG_PATH: 'C:\Program Files\LLVM\bin'
+              run: echo "LIBCLANG_PATH=C:\Program Files\LLVM\bin" >> $GITHUB_ENV
+              shell: bash
             - name: Build
               run: cargo build
               working-directory: native
