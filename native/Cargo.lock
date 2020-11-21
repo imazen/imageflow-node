@@ -775,7 +775,7 @@ checksum = "9007da9cacbd3e6343da136e98b0d2df013f553d35bdec8b518f07bea768e19c"
 [[package]]
 name = "imageflow_c_components"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.5.0-rc54#4a570be4513209a60c02d788b2bb2f8a1552d174"
+source = "git+https://github.com/imazen/imageflow?tag=v1.5.2-rc56#e8992576089a3d0e5e0a9a4f3b7f39d5aec291c9"
 dependencies = [
  "cc",
  "glob",
@@ -789,7 +789,7 @@ dependencies = [
 [[package]]
 name = "imageflow_core"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.5.0-rc54#4a570be4513209a60c02d788b2bb2f8a1552d174"
+source = "git+https://github.com/imazen/imageflow?tag=v1.5.2-rc56#e8992576089a3d0e5e0a9a4f3b7f39d5aec291c9"
 dependencies = [
  "blake2-rfc",
  "byteorder",
@@ -839,7 +839,7 @@ dependencies = [
 [[package]]
 name = "imageflow_helpers"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.5.0-rc54#4a570be4513209a60c02d788b2bb2f8a1552d174"
+source = "git+https://github.com/imazen/imageflow?tag=v1.5.2-rc56#e8992576089a3d0e5e0a9a4f3b7f39d5aec291c9"
 dependencies = [
  "backtrace",
  "base64 0.13.0",
@@ -878,7 +878,7 @@ dependencies = [
 [[package]]
 name = "imageflow_riapi"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.5.0-rc54#4a570be4513209a60c02d788b2bb2f8a1552d174"
+source = "git+https://github.com/imazen/imageflow?tag=v1.5.2-rc56#e8992576089a3d0e5e0a9a4f3b7f39d5aec291c9"
 dependencies = [
  "enum_derive",
  "ieee754",
@@ -894,7 +894,7 @@ dependencies = [
 [[package]]
 name = "imageflow_types"
 version = "0.1.0"
-source = "git+https://github.com/imazen/imageflow?tag=v1.5.0-rc54#4a570be4513209a60c02d788b2bb2f8a1552d174"
+source = "git+https://github.com/imazen/imageflow?tag=v1.5.2-rc56#e8992576089a3d0e5e0a9a4f3b7f39d5aec291c9"
 dependencies = [
  "chrono",
  "imageflow_helpers",
