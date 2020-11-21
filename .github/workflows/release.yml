@@ -41,9 +41,8 @@ jobs:
               run: choco install -y llvm
             - name: set environment variables
               if: matrix.platform=='windows-latest'
-              uses: allenevans/set-env@v1.0.0
-              with:
-                  LIBCLANG_PATH: 'C:\Program Files\LLVM\bin'
+              run: echo "LIBCLANG_PATH=C:\Program Files\LLVM\bin" >> $GITHUB_ENV
+              shell: bash
             - name: Build
               run: cargo build --release
               working-directory: native
