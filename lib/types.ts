@@ -73,20 +73,30 @@ export class GIF implements Preset {
 export class MozJPEG implements Preset {
     private readonly quality: number
     private readonly isProgressive: boolean
+    private readonly matte: Colors
     toPreset(): Object {
+        console.log(this.matte?.toColor())
         return {
             mozjpeg: {
                 quality: this.quality,
                 progressive: this.isProgressive,
+                matte: this.matte?.toColor(),
             },
         }
     }
 
-    constructor(quality: number, isProgressive: boolean) {
+    constructor(
+        quality: number,
+        {
+            isProgressive,
+            matte,
+        }: { isProgressive?: boolean; matte?: Colors } = {}
+    ) {
         if (quality > 100 || quality < 0)
             throw new Error('invalid quality for preset')
         this.isProgressive = isProgressive
         this.quality = quality
+        this.matte = matte
     }
 }
 
@@ -231,6 +241,7 @@ interface ConstrainHintsOptions {
     scalingColorScape?: ScalingFloatspace
     resampleWhen?: ResampleWhen
     sharpenWhen?: SharpenWhen
+    backgroundColor?: Colors
 }
 
 export class ConstrainHints {
@@ -240,6 +251,7 @@ export class ConstrainHints {
     private scalingColorSpace: ScalingFloatspace | null
     private resampleWhen: ResampleWhen | null
     private sharpenWhen: SharpenWhen | null
+    private backgroundColor: Colors
     toHint(): Object {
         return {
             sharpen_percent: this.sharpenPercent,
@@ -250,6 +262,7 @@ export class ConstrainHints {
                 .toLowerCase(),
             resample_when: this.resampleWhen?.toString(),
             sharpen_when: this.sharpenWhen?.toString(),
+            background_color: this.backgroundColor?.toColor(),
         }
     }
     constructor(
@@ -260,6 +273,7 @@ export class ConstrainHints {
             scalingColorScape,
             resampleWhen,
             sharpenWhen,
+            backgroundColor,
         }: ConstrainHintsOptions = {}
     ) {
         this.sharpenPercent = sharpenPercent
@@ -268,6 +282,7 @@ export class ConstrainHints {
         this.scalingColorSpace = scalingColorScape
         this.resampleWhen = resampleWhen
         this.sharpenWhen = sharpenWhen
+        this.backgroundColor = backgroundColor
     }
 }
 
@@ -316,7 +331,7 @@ export enum ConstrainMode {
 }
 
 interface ConstrainOptions {
-    canvasColor?: string
+    canvasColor?: Colors
     canvasGravity?: ConstrainGravity
     hints?: ConstrainHints
 }
@@ -326,7 +341,7 @@ export class Constrain implements BaseStep {
     private readonly height?: number
     private gravity?: ConstrainGravity
     private mode: ConstrainMode
-    private readonly canvasColor?: string
+    private readonly canvasColor?: Colors
     toStep(): Object {
         return {
             constrain: {
@@ -335,7 +350,7 @@ export class Constrain implements BaseStep {
                 h: this.height,
                 hints: this.hints?.toHint(),
                 gravity: this.gravity?.toGravity(),
-                canvas_color: this.canvasColor,
+                canvas_color: this.canvasColor?.toColor(),
             },
         }
     }

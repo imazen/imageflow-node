@@ -1,123 +1,66 @@
 const {
     MozJPEG,
     Steps,
-    FromURL,
     FromFile,
-    FromStream,
-    FromBuffer,
+    FromURL,
+    Constrain,
+    ConstrainMode,
+    ReSample,
+    ConstrainHints,
+    TransparentColor,
+    BlackColor,
+    SRGBColor,
+    ColorType,
 } = require('..')
-// const fs = require('fs')
+class Resize extends Steps {
+    resize(source, output, sizes) {
+        const [width, height] = sizes[0].split('x')
+        const out = output.replace('{w}', width).replace('{h}', height)
+        const nextSizes = sizes.slice(1)
 
-// let step = new Steps(new FromURL('https://jpeg.org/images/jpeg2000-home.jpg'))
-//     .constraintWithin(500, 500)
-//     .branch((step) =>
-//         step
-//             .constraintWithin(400, 400)
-//             .branch((step) =>
-//                 step
-//                     .constraintWithin(200, 200)
-//                     .rotate90()
-//                     .colorFilterGrayscaleFlat()
-//                     .encode(new FromFile('./branch_2.jpg'), new MozJPEG(80))
-//             )
-//             .copyRectangle(
-//                 (canvas) =>
-//                     canvas.decode(
-//                         new FromStream(fs.createReadStream('./test.jpg'))
-//                     ),
-//                 { x: 0, y: 0, w: 100, h: 100 },
-//                 10,
-//                 10
-//             )
-//             .encode(new FromFile('./branch.jpg'), new MozJPEG(80))
-//     )
-//     .constraintWithin(100, 100)
-//     .rotate180()
-// step.encode(new FromBuffer(null, 'key'), new MozJPEG(80))
-//     .execute()
-//     .then(console.log)
-//     .catch(console.log)
-
-const test = new Steps(new FromFile('./test/test.jpg'))
-    .constraintWithin(800, 800)
-    .branch((step) => step.encode(new FromFile('large.jpeg'), new MozJPEG()))
-    .branch((step) =>
-        step
-            .constraintWithin(400, 400)
-            .branch((step) =>
-                step
-                    .constraintWithin(200, 200)
-                    .branch((step) =>
-                        step
-                            .constraintWithin(100, 100)
-                            .encode(
-                                new FromFile('performing.jpeg'),
-                                new MozJPEG()
-                            )
-                    )
-                    .encode(new FromFile('small.jpeg'), new MozJPEG())
+        this.branch((step) => {
+            step.constrain(
+                new Constrain(ConstrainMode.Within, width * 1, height * 1)
             )
-            .encode(new FromFile('medium.jpeg'), new MozJPEG())
-    )
-    .execute()
+            if (nextSizes.length) {
+                step.resize(source, output, nextSizes)
+            }
+            step.encode(
+                new FromFile(out),
+                new MozJPEG(90, {
+                    isProgressive: true,
+                    matte: new SRGBColor(ColorType.Hex, '00ffff'),
+                })
+            )
+        })
 
-// class Graph {
-//     map
+        return this
+    }
+}
 
-//     constructor() {
-//         this.map = new Map()
-//     }
+const start = async function () {
+    const [src, out, min, max] = process.argv.slice(2)
+    const sizes = [
+        '1920x1920',
+        '1080x1080',
+        '720x720',
+        '480x480',
+        '360x360',
+        '120x120',
+        '60x60',
+    ]
 
-//     addVertex(ver) {
-//         this.map.set(ver, [])
-//     }
+    const input = src.indexOf('://') > -1 ? new FromURL(src) : new FromFile(src)
+    for await (const size of sizes) {
+        if (min || max) {
+            const [width, height] = size.split('x')
+            if ((min && width * 1 < min * 1) || (max && width * 1 > max * 1)) {
+                continue
+            }
+        }
+        console.log('size ' + size)
+        await new Resize(input).resize(src, out, [size]).execute()
+    }
+}
 
-//     addEdge(to, from) {
-//         console.log(this.map, to, from)
-//         this.map.get(from).push(to)
-//     }
-// }
-
-// class Base {
-//     graph
-//     vertex
-//     last
-
-//     constructor() {
-//         this.graph = new Graph()
-//         this.vertex = []
-//         this.last = 0
-//         this.graph.addVertex(0)
-//         this.vertex.push(0)
-//     }
-
-//     addEdge() {
-//         this.graph.addVertex(this.vertex.length)
-//         this.vertex.push(this.vertex.length)
-//         this.graph.addEdge(this.vertex.length - 1, this.last)
-//         this.last = this.vertex.length - 1
-//         return this
-//     }
-
-//     branch(f) {
-//         let last = this.last
-//         f(this)
-//         this.last = last
-//         return this
-//     }
-// }
-
-// let base = new Base()
-
-// base.addEdge()
-//     .branch((step) =>
-//         step
-//             .addEdge()
-//             .addEdge()
-//             .branch((step) => step.addEdge().addEdge())
-//             .addEdge()
-//     )
-//     .addEdge()
-//     .addEdge()
-
-// console.log(base.graph)
+start()
