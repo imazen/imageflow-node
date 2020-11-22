@@ -75,7 +75,6 @@ export class MozJPEG implements Preset {
     private readonly isProgressive: boolean
     private readonly matte: Colors
     toPreset(): Object {
-        console.log(this.matte?.toColor())
         return {
             mozjpeg: {
                 quality: this.quality,
