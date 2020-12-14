@@ -44,19 +44,22 @@ export abstract class BaseStep {
 
 export class Decode implements BaseStep {
     private readonly io_id: number
+    private readonly commands: Array<Object | string>
 
     toStep(): Object {
         return {
             decode: {
                 io_id: this.io_id,
+                commands: this.commands,
             },
         }
     }
     get ioID() {
         return this.io_id
     }
-    constructor(ioID: number) {
+    constructor(ioID: number, commands: DecodeOptions = null) {
         this.io_id = ioID
+        this.commands = commands?.toDecodeOptions()
     }
 }
 
@@ -1031,5 +1034,55 @@ export class ReSample implements BaseStep {
         this.w = w
         this.h = h
         this.hint = hint
+    }
+}
+
+export class DecodeOptions {
+    private commands: Array<object | string>
+
+    toDecodeOptions(): Array<object | string> {
+        return this.commands
+    }
+
+    setJPEGDownscaleHint(
+        width: Number,
+        height: Number,
+        {
+            scaleLumaSpatially = true,
+            gammaCorrectForSrgbDuringSpatialLumaScaling = true,
+        }: {
+            scaleLumaSpatially?: boolean
+            gammaCorrectForSrgbDuringSpatialLumaScaling?: boolean
+        } = {}
+    ): DecodeOptions {
+        this.commands.push({
+            jpeg_downscale_hints: {
+                width,
+                height,
+                scale_luma_spatially: scaleLumaSpatially,
+                gamma_correct_for_srgb_during_spatial_luma_scaling: gammaCorrectForSrgbDuringSpatialLumaScaling,
+            },
+        })
+        return this
+    }
+
+    discardColorProfile(): DecodeOptions {
+        this.commands.push('discard_color_profile')
+        return this
+    }
+
+    ignoreColorProfileError(): DecodeOptions {
+        this.commands.push('ignore_color_profile_errors')
+        return this
+    }
+
+    setWebpDecoderHints(width: Number, height: Number): DecodeOptions {
+        this.commands.push({
+            webp_decoder_hints: {
+                width,
+                height,
+            },
+        })
+        return this
     }
 }

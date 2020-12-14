@@ -30,6 +30,7 @@ import {
     IOOperation,
     ReSample,
     CommandString,
+    DecodeOptions,
 } from './types'
 import { NativeJob } from './job'
 
@@ -42,12 +43,12 @@ export class Steps {
     private last = 0
     private decodeValue: boolean
 
-    constructor(operation: IOOperation = null) {
+    constructor(operation: IOOperation = null, options: DecodeOptions) {
         this.graph = new Graph()
         this.ioID = 0
         if (operation) {
             operation.setIOID(this.ioID, Direction.in)
-            const decode = new Decode(this.ioID)
+            const decode = new Decode(this.ioID, options)
             this.inputs.push(operation)
             this.vertex.push(decode)
             this.graph.addVertex(0)
@@ -59,10 +60,10 @@ export class Steps {
         }
     }
 
-    decode(operation: IOOperation) {
+    decode(operation: IOOperation, options: DecodeOptions) {
         this.decodeValue = true
         operation.setIOID(this.ioID, Direction.in)
-        const decode = new Decode(this.ioID)
+        const decode = new Decode(this.ioID, options)
         this.inputs.push(operation)
         this.graph.addVertex(this.vertex.length)
 
