@@ -57,7 +57,11 @@ describe('basic', () => {
             .branch((step) =>
                 step
                     .drawImageExactTo(
-                        (steps) => steps.decode(new FromBuffer(str)),
+                        (steps) =>
+                            steps.decode(
+                                new FromBuffer(str),
+                                new DecodeOptions().discardColorProfile()
+                            ),
                         {
                             w: 10,
                             h: 10,
@@ -75,7 +79,10 @@ describe('basic', () => {
 })
 
 it('should be able perform all operations', async () => {
-    const job = await new Steps(new FromBuffer(str))
+    const job = await new Steps(
+        new FromBuffer(str),
+        new DecodeOptions().discardColorProfile()
+    )
         .constrainWithin(100, 100)
         .distort(10, 10)
         .fillRect(new FillRect(0, 0, 8, 8, new BlackColor()))
