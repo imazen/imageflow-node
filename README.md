@@ -189,8 +189,6 @@ await new Steps().executeCommand(
 8. Using Decode Options
 
 ```js
-const { MozJPEG, Steps, FromBuffer } = require('@imazen/imageflow')
-
 const output = await new Step(
     new FromBuffer(getSomeBuffer()),
     new DecodeOptions()
