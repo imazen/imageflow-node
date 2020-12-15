@@ -1039,6 +1039,18 @@ export class ReSample implements BaseStep {
 
 export class DecodeOptions {
     private commands: Array<object | string>
+    private setJPEGDownscaleHintUsed: boolean
+    private discardColorProfileUsed: boolean
+    private ignoreColorProfileErrorUsed: boolean
+    private setWebpDecoderHintsUsed: boolean
+
+    constructor() {
+        this.setJPEGDownscaleHintUsed = false
+        this.discardColorProfileUsed = false
+        this.ignoreColorProfileErrorUsed = false
+        this.setJPEGDownscaleHintUsed = false
+        this.commands = []
+    }
 
     toDecodeOptions(): Array<object | string> {
         return this.commands
@@ -1055,6 +1067,9 @@ export class DecodeOptions {
             gammaCorrectForSrgbDuringSpatialLumaScaling?: boolean
         } = {}
     ): DecodeOptions {
+        if (this.setJPEGDownscaleHintUsed)
+            throw new Error('duplicate options are not allowed')
+        this.setJPEGDownscaleHintUsed = true
         this.commands.push({
             jpeg_downscale_hints: {
                 width,
@@ -1067,16 +1082,25 @@ export class DecodeOptions {
     }
 
     discardColorProfile(): DecodeOptions {
+        if (this.discardColorProfileUsed)
+            throw new Error('duplicate options are not allowed')
+        this.discardColorProfileUsed = true
         this.commands.push('discard_color_profile')
         return this
     }
 
     ignoreColorProfileError(): DecodeOptions {
+        if (this.ignoreColorProfileErrorUsed)
+            throw new Error('duplicate options are not allowed')
+        this.ignoreColorProfileErrorUsed = true
         this.commands.push('ignore_color_profile_errors')
         return this
     }
 
     setWebpDecoderHints(width: Number, height: Number): DecodeOptions {
+        if (this.setWebpDecoderHintsUsed)
+            throw new Error('duplicate options are not allowed')
+        this.setWebpDecoderHintsUsed = true
         this.commands.push({
             webp_decoder_hints: {
                 width,

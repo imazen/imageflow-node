@@ -10,6 +10,7 @@ const {
     Region,
     CropWhitespace,
     FromStream,
+    DecodeOptions,
 } = require('..')
 
 const str = fs.readFileSync('./test/test.jpg')
@@ -125,4 +126,26 @@ it('should be able to read and write from stream', async () => {
         .encode(new FromStream(fs.createWriteStream(path)), new MozJPEG())
         .execute()
     expect(fs.readFileSync(path)).toBeInstanceOf(Buffer)
+})
+
+it('should be throw error if Decode options are called multiple times', () => {
+    expect(() => {
+        new Steps(
+            new FromBuffer(str),
+            new DecodeOptions()
+                .ignoreColorProfileError()
+                .ignoreColorProfileError()
+        )
+    }).toThrowErrorMatchingSnapshot()
+})
+
+it('should create an array for commands', () => {
+    expect(
+        new DecodeOptions()
+            .ignoreColorProfileError()
+            .setJPEGDownscaleHint(100, 100)
+            .setWebpDecoderHints(100, 100)
+            .discardColorProfile()
+            .toDecodeOptions()
+    ).toMatchSnapshot()
 })

@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should be throw error if Decode options are called multiple times 1`] = `"duplicate options are not allowed"`;
+
+exports[`should create an array for commands 1`] = `
+Array [
+  "ignore_color_profile_errors",
+  Object {
+    "jpeg_downscale_hints": Object {
+      "gamma_correct_for_srgb_during_spatial_luma_scaling": true,
+      "height": 100,
+      "scale_luma_spatially": true,
+      "width": 100,
+    },
+  },
+  Object {
+    "webp_decoder_hints": Object {
+      "height": 100,
+      "width": 100,
+    },
+  },
+  "discard_color_profile",
+]
+`;
