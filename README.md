@@ -4,7 +4,7 @@
 
 Quickly scale or modify images and optimize them for the web.
 
-If the AGPLv3 does not work for you, you can get a [commercial license](https://imageresizing.net/pricing) on a sliding scale. If you have more than 1 server doing image processing your savings should cover the cost. 
+If the AGPLv3 does not work for you, you can get a [commercial license](https://imageresizing.net/pricing) on a sliding scale. If you have more than 1 server doing image processing your savings should cover the cost.
 
 [API docs are here](https://imazen.github.io/imageflow-node/).
 
@@ -123,10 +123,7 @@ const test = new Steps(new FromStream(req))
                     .branch((step) =>
                         step
                             .constrainWithin(100, 100)
-                            .encode(
-                                new FromFile('tiny.jpg'),
-                                new MozJPEG()
-                            )
+                            .encode(new FromFile('tiny.jpg'), new MozJPEG())
                     )
                     .encode(new FromFile('small.jpg'), new MozJPEG())
             )
@@ -179,14 +176,33 @@ step.encode(new FromBuffer(null, 'key'), new MozJPEG(80))
     .catch(console.log)
 ```
 
-7. Using query style commands 
+7. Using query style commands
 
 ```js
 await new Steps().executeCommand(
-        'width=100&height=100&mode=max',
-        new FromBuffer(str),
-        new FromBuffer(null, 'key')
-    )
+    'width=100&height=100&mode=max',
+    new FromBuffer(str),
+    new FromBuffer(null, 'key')
+)
+```
+
+8. Using Decode Options
+
+```js
+const { MozJPEG, Steps, FromBuffer } = require('@imazen/imageflow')
+
+const output = await new Step(
+    new FromBuffer(getSomeBuffer()),
+    new DecodeOptions()
+        .ignoreColorProfileError()
+        .setJPEGDownscaleHint(100, 100)
+        .setWebpDecoderHints(100, 100)
+        .discardColorProfile()
+)
+    .colorFilterGrayscaleFlat()
+    .encode(new FromBuffer(null, 'key'))
+    .execute()
+console.log(output.key)
 ```
 
 ## Local Setup
