@@ -15,3 +15,5 @@ tsconfig.json
 docs/
 yarn-error.log
 .prettierrc
+**/*.log
+**/*.jpg
