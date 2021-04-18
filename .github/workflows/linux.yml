@@ -36,6 +36,13 @@ jobs:
               with:
                   path: target
                   key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+            - name: Install LLVM and Clang
+              uses: KyleMayes/install-llvm-action@v1
+              with:
+                version: "10.0"
+                directory: ${{ runner.temp }}/llvm
+            - name: set environment variables
+              run: echo "LIBCLANG_PATH=${{ runner.temp }}/llvm" >> $GITHUB_ENV
             - name: Build
               run: cargo build
               working-directory: native

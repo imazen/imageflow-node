@@ -657,7 +657,7 @@ pub unsafe extern "C" fn drop_native(
     finalize_data: *mut c_void,
     _finalize_hint: *mut c_void,
 ) {
-    Box::from_raw(finalize_data);
+    let _task: Box<Context> = Box::from_raw(std::mem::transmute(finalize_data));
 }
 
 pub struct Context {
