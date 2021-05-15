@@ -31,7 +31,16 @@ import {
     ReSample,
     CommandString,
     DecodeOptions,
+    MozJPEG,
+    Colors,
+    LossyPNG,
+    WebPLossless,
+    LosslessPNG,
+    FromFile,
+    FromBuffer,
+    FromStream,
 } from './types'
+import * as stream from 'stream'
 import { NativeJob } from './job'
 
 export class Steps {
@@ -473,6 +482,45 @@ export class Steps {
         this.graph.addEdge(this.vertex.length - 1, this.last)
         this.last = this.vertex.length - 1
         return this
+    }
+    toJpeg(operation:IOOperation,{
+        quality=90,
+        isProgressive,
+        matte,
+    }: { isProgressive?: boolean; matte?: Colors,quality?:number } = {quality:90}){
+        const encoder = new MozJPEG(quality,{isProgressive,matte})
+        this.encode(operation,encoder)
+        return this
+    }
+    toPng(operation:IOOperation,maxDeflate: boolean = false){
+        const encoder = new LosslessPNG(maxDeflate)
+        this.encode(operation,encoder)
+        return this
+    }
+    toWebP(operation:IOOperation){
+        const encoder = new WebPLossless()
+        this.encode(operation,encoder)
+        return this
+    }
+    toFile(preset :Preset,filePath:string){
+        const iOOperation =new FromFile(filePath)
+        this.encode(iOOperation,preset)
+        return this
+    }
+    toBuffer(preset: Preset,key:string){
+        const iOOperation = new FromBuffer(null,key)
+        this.encode(iOOperation,preset)
+        return this
+    }
+    toStream(preset: Preset,stream: stream.Stream){
+        const iOOperation = new FromStream(stream)
+        this.encode(iOOperation,preset)
+        return this
+    }
+    fromStream(stream: stream.Stream){
+        const operation= new FromStream(stream)
+        this.decode(operation,null)
+
     }
 }
 

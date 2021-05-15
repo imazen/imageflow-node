@@ -1,4 +1,5 @@
 const fs = require('fs')
+const { Stream } = require('stream')
 const {
     Steps,
     FromBuffer,
@@ -43,7 +44,7 @@ describe('basic', () => {
             .branch((step) =>
                 step
                     .colorFilterGrayscaleNtsc()
-                    .encode(new FromBuffer(null, 'key_2'), new MozJPEG())
+                    .toBuffer(new MozJPEG(),"key_2")
             )
             .encode(new FromBuffer(null, 'key'), new MozJPEG())
             .execute()
@@ -102,7 +103,7 @@ it('should be able perform all operations', async () => {
         .colorFilterGrayscaleBt709()
         .colorFilterGrayscaleFlat()
         .colorFilterGrayscaleRY()
-        .encode(new FromBuffer(null, 'key'), new MozJPEG())
+        .toJpeg(new FromBuffer(null, 'key'))
         .execute()
     expect(job.key).toBeInstanceOf(Buffer)
 })
@@ -156,3 +157,31 @@ it('should create an array for commands', () => {
             .toDecodeOptions()
     ).toMatchSnapshot()
 })
+
+describe("Encode operations",()=>{
+    it('should create right json for toBuffer',()=>{
+        expect(new Steps(new FromFile("test_file.jpg")).constrainWithin(100,100).toBuffer(new MozJPEG())).toMatchSnapshot()
+    })
+    
+    it('should create right json for toFile',()=>{
+        expect(new Steps(new FromFile("test_file.jpg")).constrainWithin(100,100).toFile(new MozJPEG(),"test_output.jpg")).toMatchSnapshot()
+    })
+    
+    it('should create right json for toStream',()=>{
+        expect(new Steps(new FromFile("test_file.jpg")).constrainWithin(100,100).toStream(new MozJPEG(),null)).toMatchSnapshot()
+    })
+    
+    it('should create right json for toJpeg',()=>{
+        expect(new Steps(new FromFile("test_file.jpg")).constrainWithin(100,100).toJpeg(new FromFile("test.jpeg"))).toMatchSnapshot()
+    })
+    
+    it('should create right json for toPng',()=>{
+        expect(new Steps(new FromFile("test_file.jpg")).constrainWithin(100,100).toPng(new FromFile("test.png"))).toMatchSnapshot()
+    })
+    
+    it('should create right josn for toWebp',()=>{
+        expect(new Steps(new FromFile("test_file.jpg")).constrainWithin(100,100).toWebP(new FromFile("test.png"))).toMatchSnapshot()
+    })
+})
+
+
