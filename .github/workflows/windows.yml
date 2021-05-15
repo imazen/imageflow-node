@@ -9,7 +9,7 @@ jobs:
     build:
         strategy:
             matrix:
-                node: ['10', '12', '15', '14']
+                node: ['12', '15', '14','16']
 
         runs-on: windows-latest
 

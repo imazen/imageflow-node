@@ -33,7 +33,6 @@ import {
     DecodeOptions,
     MozJPEG,
     Colors,
-    LossyPNG,
     WebPLossless,
     LosslessPNG,
     FromFile,

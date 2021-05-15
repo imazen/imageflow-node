@@ -1,5 +1,4 @@
 const fs = require('fs')
-const { Stream } = require('stream')
 const {
     Steps,
     FromBuffer,
@@ -179,7 +178,7 @@ describe("Encode operations",()=>{
         expect(new Steps(new FromFile("test_file.jpg")).constrainWithin(100,100).toPng(new FromFile("test.png"))).toMatchSnapshot()
     })
     
-    it('should create right josn for toWebp',()=>{
+    it('should create right json for toWebp',()=>{
         expect(new Steps(new FromFile("test_file.jpg")).constrainWithin(100,100).toWebP(new FromFile("test.png"))).toMatchSnapshot()
     })
 })

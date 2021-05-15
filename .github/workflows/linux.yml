@@ -11,7 +11,7 @@ jobs:
         strategy:
             matrix:
                 platform: [ubuntu-latest, ubuntu-16.04]
-                node: ['10', '12', '15', '14']
+                node: ['16', '12', '15', '14']
 
         runs-on: ${{ matrix.platform }}
 

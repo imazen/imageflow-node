@@ -1,62 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Encode operations should create right josn for toWebp 1`] = `
-Steps {
-  "decodeValue": true,
-  "graph": Graph {
-    "_internal": Map {
-      0 => Array [
-        Object {
-          "to": 1,
-          "type": "input",
-        },
-      ],
-      1 => Array [
-        Object {
-          "to": 2,
-          "type": "input",
-        },
-      ],
-      2 => Array [],
-    },
-  },
-  "inputs": Array [
-    FromFile {
-      "direction": "in",
-      "filename": "test_file.jpg",
-      "ioId": 0,
-    },
-  ],
-  "ioID": 2,
-  "last": 2,
-  "outputs": Array [
-    FromFile {
-      "direction": "out",
-      "filename": "test.png",
-      "ioId": 1,
-    },
-  ],
-  "vertex": Array [
-    Decode {
-      "commands": undefined,
-      "io_id": 0,
-    },
-    Constrain {
-      "canvasColor": null,
-      "gravity": null,
-      "height": 100,
-      "hints": null,
-      "mode": "within",
-      "width": 100,
-    },
-    Encode {
-      "io_id": 1,
-      "preset": WebPLossless {},
-    },
-  ],
-}
-`;
-
 exports[`Encode operations should create right json for toBuffer 1`] = `
 Steps {
   "decodeValue": true,
@@ -356,6 +299,63 @@ Steps {
         "matte": undefined,
         "quality": undefined,
       },
+    },
+  ],
+}
+`;
+
+exports[`Encode operations should create right json for toWebp 1`] = `
+Steps {
+  "decodeValue": true,
+  "graph": Graph {
+    "_internal": Map {
+      0 => Array [
+        Object {
+          "to": 1,
+          "type": "input",
+        },
+      ],
+      1 => Array [
+        Object {
+          "to": 2,
+          "type": "input",
+        },
+      ],
+      2 => Array [],
+    },
+  },
+  "inputs": Array [
+    FromFile {
+      "direction": "in",
+      "filename": "test_file.jpg",
+      "ioId": 0,
+    },
+  ],
+  "ioID": 2,
+  "last": 2,
+  "outputs": Array [
+    FromFile {
+      "direction": "out",
+      "filename": "test.png",
+      "ioId": 1,
+    },
+  ],
+  "vertex": Array [
+    Decode {
+      "commands": undefined,
+      "io_id": 0,
+    },
+    Constrain {
+      "canvasColor": null,
+      "gravity": null,
+      "height": 100,
+      "hints": null,
+      "mode": "within",
+      "width": 100,
+    },
+    Encode {
+      "io_id": 1,
+      "preset": WebPLossless {},
     },
   ],
 }
