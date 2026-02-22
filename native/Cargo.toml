@@ -2,7 +2,7 @@
 name = "imageflow_node"
 version = "0.1.1"
 authors = ["Lilith River <lilith@imazen.io>"]
-edition = "2024"
+edition = "2021"
 license = "AGPL-3.0-or-later"
 build = "build.rs"
 exclude = ["artifacts.json", "index.node"]
