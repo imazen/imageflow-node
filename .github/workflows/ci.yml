@@ -1,27 +1,22 @@
-name: Release
+name: CI
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
-  build:
+  build-and-test:
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
             lib-name: libimageflow_node.so
-            artifact-name: libimageflow-ubuntu-latest.node
           - os: macos-latest
             lib-name: libimageflow_node.dylib
-            artifact-name: libimageflow-macos-arm64.node
-          - os: macos-13
-            lib-name: libimageflow_node.dylib
-            artifact-name: libimageflow-macos-x64.node
           - os: windows-latest
             lib-name: imageflow_node.dll
-            artifact-name: libimageflow-windows-latest.node
 
     runs-on: ${{ matrix.os }}
 
@@ -43,9 +38,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             native/target
-          key: ${{ runner.os }}-cargo-release-${{ hashFiles('native/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('native/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-release-
+            ${{ runner.os }}-cargo-
 
       - name: Install LLVM (Linux)
         if: runner.os == 'Linux'
@@ -60,22 +55,24 @@ jobs:
         shell: bash
         run: echo "LIBCLANG_PATH=C:\Program Files\LLVM\bin" >> $GITHUB_ENV
 
-      - name: Build native module (release)
+      - name: Build native module
         working-directory: native
-        run: cargo build --release
+        run: cargo build
 
-      - name: Copy release artifact (Unix)
+      - name: Copy native artifact (Unix)
         if: runner.os != 'Windows'
-        run: cp native/target/release/${{ matrix.lib-name }} ${{ matrix.artifact-name }}
+        run: cp native/target/debug/${{ matrix.lib-name }} native/index.node
 
-      - name: Copy release artifact (Windows)
+      - name: Copy native artifact (Windows)
         if: runner.os == 'Windows'
         shell: bash
-        run: cp native/target/release/${{ matrix.lib-name }} ${{ matrix.artifact-name }}
+        run: cp native/target/debug/${{ matrix.lib-name }} native/index.node
 
-      - name: Upload to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ matrix.artifact-name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
