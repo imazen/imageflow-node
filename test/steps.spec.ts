@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
-import { Steps, FromBuffer, FromFile, FromStream, DecodeOptions, presets } from '../dist/index.js';
-import type { ExecuteResult } from '../dist/index.js';
+import { Steps, FromBuffer, FromFile, FromStream, DecodeOptions, presets } from '../lib/index.js';
+import type { ExecuteResult } from '../lib/index.js';
 
 const testJpg = fs.readFileSync('./test/test.jpg');
 

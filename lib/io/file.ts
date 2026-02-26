@@ -2,6 +2,12 @@ import * as fs from 'node:fs/promises';
 import type { IoDirection } from '../schema/enums.js';
 import type { IOSource, IODestination } from './types.js';
 
+/**
+ * File-based IO adapter. Reads from or writes to a file path.
+ *
+ * When used as a source, reads the entire file into memory.
+ * When used as a destination, writes the encoded bytes to disk.
+ */
 export class FromFile implements IOSource, IODestination {
   private id = -1;
   private direction: IoDirection = 'in';

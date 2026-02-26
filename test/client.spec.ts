@@ -1,5 +1,5 @@
 import * as fs from 'node:fs';
-import { getImageInfo, getVersionInfo, FromBuffer } from '../dist/index.js';
+import { getImageInfo, getVersionInfo, FromBuffer } from '../lib/index.js';
 
 const testJpg = fs.readFileSync('./test/test.jpg');
 

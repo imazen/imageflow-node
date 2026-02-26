@@ -1,4 +1,4 @@
-import { presets } from '../dist/index.js';
+import { presets } from '../lib/index.js';
 
 describe('Encoder presets', () => {
   it('gif() returns string', () => {

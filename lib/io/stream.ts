@@ -11,6 +11,11 @@ async function streamToBuffer(stream: Readable): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
+/**
+ * Stream-based IO adapter.
+ *
+ * As a source, reads from a Readable stream. As a destination, writes to a Writable stream.
+ */
 export class FromStream implements IOSource, IODestination {
   private id = -1;
   private direction: IoDirection = 'in';

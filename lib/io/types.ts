@@ -2,12 +2,14 @@
 
 import type { IoDirection } from '../schema/enums.js';
 
+/** An image input source that can provide bytes to the pipeline. */
 export interface IOSource {
   setIOID(id: number, direction: IoDirection): void;
   readonly ioID: number;
   toBuffer(): Promise<Buffer>;
 }
 
+/** An image output destination that receives encoded bytes from the pipeline. */
 export interface IODestination {
   setIOID(id: number, direction: IoDirection): void;
   readonly ioID: number;

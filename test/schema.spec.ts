@@ -1,6 +1,6 @@
-import type { Node } from '../dist/schema/nodes.js';
-import type { EncoderPreset } from '../dist/schema/encoders.js';
-import type { DecoderCommand } from '../dist/schema/decoders.js';
+import type { Node } from '../lib/schema/nodes.js';
+import type { EncoderPreset } from '../lib/schema/encoders.js';
+import type { DecoderCommand } from '../lib/schema/decoders.js';
 
 describe('schema types — serialization', () => {
   describe('Node variants', () => {
