@@ -21,7 +21,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "spec": "node --experimental-vm-modules node_modules/.bin/jest",
+    "spec": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test": "npm run spec",
     "install": "node scripts/download.js",
     "build": "tsc"
