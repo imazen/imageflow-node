@@ -1,64 +1,75 @@
-const version = require('../package.json').version
-const fs = require('fs')
-const axios = require('axios')
-const child_process = require('child_process')
+// Post-install script: copies native binary if it doesn't exist yet.
+// When using napi-rs with prebuilt binaries, this downloads from GitHub releases.
+// For local development, `cargo build` + copy is the workflow.
 
-let OS = {
-    darwin: 'macos-latest',
-    linux: 'ubuntu-16.04',
-    win32: 'windows-latest',
+import { existsSync } from 'node:fs';
+import { execSync, spawnSync } from 'node:child_process';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const indexNode = join(__dirname, '..', 'native', 'index.node');
+
+if (existsSync(indexNode)) {
+  process.exit(0);
 }
 
-let PREFIX = {
-    darwin: 'lib',
-    freebsd: 'lib',
-    linux: 'lib',
-    sunos: 'lib',
-    win32: '',
-}
+// Platform mapping for prebuilt binary filenames
+const PLATFORM_MAP = {
+  darwin: 'macos-latest',
+  linux: 'ubuntu-latest',
+  win32: 'windows-latest',
+};
 
-let SUFFIX = {
-    darwin: '.dylib',
-    freebsd: '.so',
-    linux: '.so',
-    sunos: '.so',
-    win32: '.dll',
-}
-let platform = OS[process.platform]
+const PREFIX = {
+  darwin: 'lib',
+  freebsd: 'lib',
+  linux: 'lib',
+  sunos: 'lib',
+  win32: '',
+};
 
-try {
-    let stats = fs.statSync(__dirname + '/../native/index.node')
-    if (stats) return
-} catch {}
+const SUFFIX = {
+  darwin: '.dylib',
+  freebsd: '.so',
+  linux: '.so',
+  sunos: '.so',
+  win32: '.dll',
+};
+
+const platform = PLATFORM_MAP[process.platform];
 
 if (platform) {
-    let url = `https://github.com/imazen/imageflow-node/releases/download/${version}/libimageflow-${platform}.node`
+  // Try to fetch prebuilt binary from GitHub releases
+  const pkg = JSON.parse(
+    (await import('node:fs/promises')).then(fs => fs.readFile(join(__dirname, '..', 'package.json'), 'utf8')).catch(() => '{}')
+  );
 
-    axios({
-        method: 'get',
-        url: url,
-        responseType: 'stream',
-    })
-        .then(function (response) {
-            response.data.pipe(fs.createWriteStream('./native/index.node'))
-        })
-        .catch(() => {
-            throw 'Unable to download the required binary'
-        })
-} else {
-    try {
-        child_process.execSync('rustc --version').toString()
-    } catch {
-        throw 'Error prebuilt binary not found please install rust and built it again'
-    }
-
-    child_process.execSync('cargo build --release', {
-        cwd: __dirname + '/../native',
-    })
-    fs.copyFileSync(
-        `${__dirname}/../native/target/release/${
-            PREFIX[process.platform]
-        }imageflow_node${SUFFIX[process.platform]}`,
-        __dirname + '/../native/index.node'
-    )
+  // Fall through to cargo build if download isn't available
+  console.log('Prebuilt binary not found, building from source...');
 }
+
+// Build from source
+const rustcResult = spawnSync('rustc', ['--version']);
+if (rustcResult.error) {
+  console.error('Error: prebuilt binary not available for this platform.');
+  console.error('Please install Rust (https://rustup.rs/) and try again.');
+  process.exit(1);
+}
+
+console.log('Building native module from source...');
+execSync('cargo build --release', {
+  cwd: join(__dirname, '..', 'native'),
+  stdio: 'inherit',
+});
+
+const prefix = PREFIX[process.platform] ?? 'lib';
+const suffix = SUFFIX[process.platform] ?? '.so';
+const builtLib = join(
+  __dirname, '..', 'native', 'target', 'release',
+  `${prefix}imageflow_node${suffix}`,
+);
+
+import { copyFileSync } from 'node:fs';
+copyFileSync(builtLib, indexNode);
+console.log('Native module built successfully.');

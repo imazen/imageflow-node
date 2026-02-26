@@ -1,21 +1,18 @@
 {
-    "compilerOptions": {
-        "module": "CommonJS",
-        "noImplicitAny": true,
-        "removeComments": true,
-        "preserveConstEnums": true,
-        "sourceMap": true,
-        "moduleResolution": "node",
-        "declaration": true,
-        "outDir": "./dist",
-        "target": "es6",
-        "suppressImplicitAnyIndexErrors": true
-    },
-    "include": ["lib/**/*"],
-    "exclude": ["**/node_modules", "**/*.spec.ts","**/*.d.ts"],
-    "typedocOptions": {
-        "mode": "library",
-        "out": "docs",
-        "exclude":"native"
-    }
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./lib",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["lib/**/*"],
+  "exclude": ["**/node_modules", "**/*.spec.ts", "**/*.d.ts"]
 }

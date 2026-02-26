@@ -1,58 +1,52 @@
-import Job, { JobType } from './native'
+import { NativeJobConstructor, getLongVersionString } from './native.js';
+import type { NativeJobType } from './native.js';
+
+export { getLongVersionString };
 
 export class NativeJob {
-    private inUse: boolean
-    private internalJob: JobType
+  private inUse = false;
+  private job: NativeJobType;
 
-    constructor() {
-        this.inUse = false;
-        this.internalJob = new Job();
-    }
-    addInputBytes(ioId: number, bytes: ArrayBuffer) {
-        if (this.inUse) {
-            throw new Error("Already running a Job");
-        } else {
-            this.internalJob.addInputBytesCopied(ioId, bytes)
-        }
-    }
+  constructor() {
+    this.job = new NativeJobConstructor();
+  }
 
-    getOutputBufferBytes(ioId: number): ArrayBuffer {
-        if (this.inUse) {
-            throw new Error("Already running a Job");
-        } else {
-            return this.internalJob.getOutputBufferBytes(ioId)
-        }
-    }
+  addInputBytes(ioId: number, bytes: Buffer): void {
+    if (this.inUse) throw new Error('Already running a Job');
+    this.job.addInputBytesCopied(ioId, bytes);
+  }
 
-    addOutputBuffer(ioId: number) {
-        if (this.inUse) {
-            throw new Error("Already running a Job");
-        } else {
-            this.internalJob.addOutputBuffer(ioId)
-        }
-    }
+  getOutputBufferBytes(ioId: number): Buffer {
+    if (this.inUse) throw new Error('Already running a Job');
+    return this.job.getOutputBufferBytes(ioId);
+  }
 
-    async message(endPoint: string, tasks: string): Promise<string> {
-        if (this.inUse) {
-            throw new Error("Already running a Job");
-        } else {
-            this.inUse = true;
-            const response = await this.internalJob.message(endPoint, tasks);
-            this.inUse = false;
-            return response;
-        }
-    }
+  addOutputBuffer(ioId: number): void {
+    if (this.inUse) throw new Error('Already running a Job');
+    this.job.addOutputBuffer(ioId);
+  }
 
-    messageSync(endPoint: string, tasks: string): string {
-        if (this.inUse) {
-            throw new Error("Already running a Job");
-        } else {
-            this.inUse = true;
-            const response = this.internalJob.messageSync(endPoint, tasks);
-            this.inUse = false;
-            return response;
-        }
+  async message(endpoint: string, json: string): Promise<string> {
+    if (this.inUse) throw new Error('Already running a Job');
+    this.inUse = true;
+    try {
+      return await this.job.message(endpoint, json);
+    } finally {
+      this.inUse = false;
     }
+  }
+
+  messageSync(endpoint: string, json: string): string {
+    if (this.inUse) throw new Error('Already running a Job');
+    this.inUse = true;
+    try {
+      return this.job.messageSync(endpoint, json);
+    } finally {
+      this.inUse = false;
+    }
+  }
+
+  clean(): void {
+    this.job.clean();
+  }
 }
-
-export { getLongVersionString } from "./native";

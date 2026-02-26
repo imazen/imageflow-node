@@ -1,18 +1,15 @@
-const addon = require('../native/index.node')
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const addon = require('../native/index.node');
 
-export interface JobType {
-    addInputBytesCopied(ioId: number, bytes: ArrayBuffer): void
-    getOutputBufferBytes(ioId: number): ArrayBuffer
-    addOutputBuffer(ioId: number): void
-    message(endPoint: string, tasks: string): Promise<string>
-    messageSync(endPoint: string, tasks: string): string
+export interface NativeJobType {
+  addInputBytesCopied(ioId: number, bytes: Buffer): void;
+  getOutputBufferBytes(ioId: number): Buffer;
+  addOutputBuffer(ioId: number): void;
+  message(endpoint: string, json: string): Promise<string>;
+  messageSync(endpoint: string, json: string): string;
+  clean(): void;
 }
 
-var Job: {
-    new (): JobType
-} = addon.Job
-
-export default Job
-
-export var getLongVersionString: () => string =
-    addon.getLongVersionString
+export const NativeJobConstructor: { new (): NativeJobType } = addon.Job;
+export const getLongVersionString: () => string = addon.getLongVersionString;

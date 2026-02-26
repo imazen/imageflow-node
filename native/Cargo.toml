@@ -1,6 +1,6 @@
 [package]
 name = "imageflow_node"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Lilith River <lilith@imazen.io>"]
 edition = "2021"
 license = "AGPL-3.0-or-later"
@@ -11,13 +11,11 @@ exclude = ["artifacts.json", "index.node"]
 name = "imageflow_node"
 crate-type = ["cdylib"]
 
-
 [dependencies]
-imageflow_core = { git = "https://github.com/imazen/imageflow", tag = "v1.5.8-rc62" }
-imageflow_types = { git = "https://github.com/imazen/imageflow", tag = "v1.5.8-rc62" }
-nodejs-sys = "0.3.0"
-threadpool = "1.8.1"
-
+imageflow_core = { git = "https://github.com/imazen/imageflow", tag = "v2.3.0-rc01" }
+imageflow_types = { git = "https://github.com/imazen/imageflow", tag = "v2.3.0-rc01" }
+napi = { version = "2.16", features = ["napi6"] }
+napi-derive = "2.16"
 
 [build-dependencies]
-reqwest = { version = "0.10", features = ["native-tls", "blocking"] }
+napi-build = "2"
