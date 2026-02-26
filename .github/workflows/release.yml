@@ -10,18 +10,31 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Linux x64
           - os: ubuntu-latest
             lib-name: libimageflow_node.so
-            artifact-name: libimageflow-ubuntu-latest.node
+            artifact-name: libimageflow-linux-x64.node
+          # Linux arm64
+          - os: ubuntu-24.04-arm
+            lib-name: libimageflow_node.so
+            artifact-name: libimageflow-linux-arm64.node
+          # macOS arm64 (Apple Silicon)
           - os: macos-latest
             lib-name: libimageflow_node.dylib
             artifact-name: libimageflow-macos-arm64.node
+          # macOS x64
           - os: macos-13
             lib-name: libimageflow_node.dylib
             artifact-name: libimageflow-macos-x64.node
+          # Windows x64
           - os: windows-latest
             lib-name: imageflow_node.dll
-            artifact-name: libimageflow-windows-latest.node
+            artifact-name: libimageflow-win-x64.node
+          # Windows arm64 (cross-compiled from x64)
+          - os: windows-latest
+            lib-name: imageflow_node.dll
+            artifact-name: libimageflow-win-arm64.node
+            rust-target: aarch64-pc-windows-msvc
 
     runs-on: ${{ matrix.os }}
 
@@ -35,6 +48,8 @@ jobs:
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-target || '' }}
 
       - name: Cache Cargo
         uses: actions/cache@v4
@@ -43,9 +58,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             native/target
-          key: ${{ runner.os }}-cargo-release-${{ hashFiles('native/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ matrix.rust-target || 'native' }}-cargo-release-${{ hashFiles('native/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-release-
+            ${{ runner.os }}-${{ matrix.rust-target || 'native' }}-cargo-release-
 
       - name: Install LLVM (Linux)
         if: runner.os == 'Linux'
@@ -60,16 +75,31 @@ jobs:
         shell: bash
         run: echo "LIBCLANG_PATH=C:\Program Files\LLVM\bin" >> $GITHUB_ENV
 
-      - name: Build native module (release)
+      - name: Build native module (release, cross-compile)
+        if: matrix.rust-target
+        working-directory: native
+        run: cargo build --release --target ${{ matrix.rust-target }}
+
+      - name: Build native module (release, native)
+        if: '!matrix.rust-target'
         working-directory: native
         run: cargo build --release
 
-      - name: Copy release artifact (Unix)
-        if: runner.os != 'Windows'
+      - name: Copy release artifact (cross-compile, Unix)
+        if: matrix.rust-target && runner.os != 'Windows'
+        run: cp native/target/${{ matrix.rust-target }}/release/${{ matrix.lib-name }} ${{ matrix.artifact-name }}
+
+      - name: Copy release artifact (cross-compile, Windows)
+        if: matrix.rust-target && runner.os == 'Windows'
+        shell: bash
+        run: cp native/target/${{ matrix.rust-target }}/release/${{ matrix.lib-name }} ${{ matrix.artifact-name }}
+
+      - name: Copy release artifact (native, Unix)
+        if: '!matrix.rust-target && runner.os != ''Windows'''
         run: cp native/target/release/${{ matrix.lib-name }} ${{ matrix.artifact-name }}
 
-      - name: Copy release artifact (Windows)
-        if: runner.os == 'Windows'
+      - name: Copy release artifact (native, Windows)
+        if: '!matrix.rust-target && runner.os == ''Windows'''
         shell: bash
         run: cp native/target/release/${{ matrix.lib-name }} ${{ matrix.artifact-name }}
 
