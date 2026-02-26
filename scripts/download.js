@@ -8,7 +8,6 @@ import { existsSync, copyFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { execSync, spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const nativeDir = join(__dirname, '..', 'native');
@@ -31,10 +30,6 @@ const ARTIFACT_MAP = {
 const platformKey = `${process.platform}-${process.arch}`;
 const artifactName = ARTIFACT_MAP[platformKey];
 
-// Read package version to find matching GitHub release
-const require = createRequire(import.meta.url);
-const pkg = require('../package.json');
-const version = pkg.version;
 const repo = 'imazen/imageflow-node';
 
 async function tryDownloadPrebuilt() {
@@ -43,12 +38,23 @@ async function tryDownloadPrebuilt() {
     return false;
   }
 
-  const tag = `v${version}`;
-  const url = `https://github.com/${repo}/releases/download/${tag}/${artifactName}`;
-
-  console.log(`Downloading prebuilt binary for ${platformKey} from ${url}...`);
-
   try {
+    // Fetch latest release tag from GitHub API
+    console.log(`Querying latest release from ${repo}...`);
+    const apiUrl = `https://api.github.com/repos/${repo}/releases/latest`;
+    const apiResp = await fetch(apiUrl, {
+      headers: { 'Accept': 'application/vnd.github.v3+json' },
+    });
+    if (!apiResp.ok) {
+      console.log(`GitHub API returned ${apiResp.status}, will build from source.`);
+      return false;
+    }
+    const release = await apiResp.json();
+    const tag = release.tag_name;
+
+    const url = `https://github.com/${repo}/releases/download/${tag}/${artifactName}`;
+    console.log(`Downloading prebuilt binary for ${platformKey} from ${tag}...`);
+
     const response = await fetch(url, { redirect: 'follow' });
     if (!response.ok) {
       console.log(`Download failed (HTTP ${response.status}), will build from source.`);
