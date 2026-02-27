@@ -18,6 +18,7 @@ yarn-1.19.0.js$
 \.node$
 (?:^|/)node_modules/
 (?:^|/)dist/
+(?:^|/)lib/
 (?:^|/)__snapshots__/
 ^\.github/workflows/
 ^\.npmignore$
