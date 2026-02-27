@@ -15,6 +15,9 @@ import type { DecoderCommand } from '../schema/decoders.js';
 import { DecodeOptions } from './decode-options.js';
 import { mozjpeg, lodepng, webpLossless } from './presets.js';
 import type { IOSource, IODestination } from '../io/types.js';
+import { FromFile } from '../io/file.js';
+import { FromBuffer } from '../io/buffer.js';
+import { FromStream } from '../io/stream.js';
 import { NativeJob, getLongVersionString } from '../job.js';
 
 // Internal graph adjacency
@@ -48,15 +51,22 @@ class GraphBuilder {
   }
 }
 
+/** Result returned by {@link Steps.execute} and {@link Steps.executeCommand}. */
 export interface ExecuteResult {
-  /** Raw response from imageflow engine */
+  /** Raw response from the imageflow engine. */
   response: Response001;
-  /** Parsed job result with encode/decode metadata */
+  /** Parsed job result with encode/decode metadata. */
   jobResult: JobResult;
-  /** Named output buffers (keyed by the key passed to FromBuffer) */
+  /** Named output buffers (keyed by the key passed to FromBuffer). */
   buffers: Record<string, Buffer>;
 }
 
+/**
+ * Graph-based image processing pipeline with full branching and multi-output support.
+ *
+ * Each method appends a node to an internal DAG and returns `this` for chaining.
+ * For simpler single-input/single-output workflows, see {@link Pipeline}.
+ */
 export class Steps {
   private graph = new GraphBuilder();
   private nodes: Node[] = [];
@@ -66,6 +76,12 @@ export class Steps {
   private last = 0;
   private hasDecoded = false;
 
+  /**
+   * Create a new pipeline, optionally starting with a decode step.
+   *
+   * @param source - Input image source (omit for manual decode via {@link decode})
+   * @param options - Optional decode options (color profile handling, downscale hints)
+   */
   constructor(source?: IOSource, options?: DecodeOptions) {
     if (source) {
       source.setIOID(this.ioId, 'in');
@@ -81,6 +97,7 @@ export class Steps {
 
   // ── Input ───────────────────────────────────────────────────
 
+  /** Add a decode node for an additional image source (used in multi-input pipelines). */
   decode(source: IOSource, options?: DecodeOptions): this {
     source.setIOID(this.ioId, 'in');
     this.inputs.push(source);
@@ -96,6 +113,7 @@ export class Steps {
 
   // ── Output ──────────────────────────────────────────────────
 
+  /** Encode the current image state to a destination using the given preset. */
   encode(dest: IODestination, preset: EncoderPreset): this {
     this.requireDecode();
     dest.setIOID(this.ioId, 'out');
@@ -111,6 +129,7 @@ export class Steps {
 
   // ── Convenience output shortcuts ────────────────────────────
 
+  /** Encode to JPEG using MozJPEG (default quality 90). */
   toJpeg(
     dest: IODestination,
     options?: { quality?: number; progressive?: boolean; matte?: Color },
@@ -124,78 +143,91 @@ export class Steps {
     );
   }
 
+  /** Encode to PNG using LodePNG. */
   toPng(dest: IODestination, maximumDeflate = false): this {
     return this.encode(dest, lodepng(maximumDeflate));
   }
 
+  /** Encode to lossless WebP. */
   toWebP(dest: IODestination): this {
     return this.encode(dest, webpLossless());
   }
 
+  /** Encode and write to a file path. */
   toFile(preset: EncoderPreset, filePath: string): this {
-    // Lazy import to avoid circular dependency at module load time
-    const { FromFile } = require('../io/file.js') as typeof import('../io/file.js');
     return this.encode(new FromFile(filePath), preset);
   }
 
+  /** Encode to an in-memory buffer, optionally keyed for retrieval from {@link ExecuteResult.buffers}. */
   toBuffer(preset: EncoderPreset, key?: string): this {
-    const { FromBuffer } = require('../io/buffer.js') as typeof import('../io/buffer.js');
     return this.encode(new FromBuffer(null, key), preset);
   }
 
+  /** Encode and pipe to a writable stream. */
   toStream(preset: EncoderPreset, stream: NodeJS.WritableStream): this {
-    const { FromStream } = require('../io/stream.js') as typeof import('../io/stream.js');
     return this.encode(new FromStream(stream), preset);
   }
 
   // ── Transforms ──────────────────────────────────────────────
 
+  /** Constrain the image to fit within the given dimensions, preserving aspect ratio. */
   constrainWithin(w: number, h: number): this {
     return this.constrain({ mode: 'within', w, h });
   }
 
+  /** Apply a constraint with full control over mode and parameters. */
   constrain(c: Constraint): this {
     return this.addStep({ constrain: c });
   }
 
+  /** Resize to exact dimensions, ignoring aspect ratio. */
   distort(w: number, h: number, hints?: ResampleHints): this {
     return this.addStep({ resample_2d: { w, h, hints } });
   }
 
+  /** Rotate 90 degrees clockwise. */
   rotate90(): this {
     return this.addStep('rotate_90');
   }
 
+  /** Rotate 180 degrees. */
   rotate180(): this {
     return this.addStep('rotate_180');
   }
 
+  /** Rotate 270 degrees clockwise (90 degrees counter-clockwise). */
   rotate270(): this {
     return this.addStep('rotate_270');
   }
 
+  /** Flip the image vertically. */
   flipVertical(): this {
     return this.addStep('flip_v');
   }
 
+  /** Flip the image horizontally. */
   flipHorizontal(): this {
     return this.addStep('flip_h');
   }
 
+  /** Transpose the image (swap x and y axes). */
   transpose(): this {
     return this.addStep('transpose');
   }
 
+  /** Apply EXIF orientation correction. */
   applyOrientation(flag: number): this {
     return this.addStep({ apply_orientation: { flag } });
   }
 
   // ── Crop / Region ───────────────────────────────────────────
 
+  /** Crop to the rectangle defined by pixel coordinates. */
   crop(x1: number, y1: number, x2: number, y2: number): this {
     return this.addStep({ crop: { x1, y1, x2, y2 } });
   }
 
+  /** Extract a region with a background color fill for out-of-bounds areas. */
   region(
     x1: number,
     y1: number,
@@ -206,6 +238,7 @@ export class Steps {
     return this.addStep({ region: { x1, y1, x2, y2, background_color: backgroundColor } });
   }
 
+  /** Extract a region using percentage-based coordinates. */
   regionPercent(
     x1: number,
     y1: number,
@@ -218,6 +251,7 @@ export class Steps {
     });
   }
 
+  /** Auto-crop whitespace around the image content. */
   cropWhitespace(threshold: number, percentPadding: number): this {
     return this.addStep({
       crop_whitespace: { threshold, percent_padding: percentPadding },
@@ -226,6 +260,7 @@ export class Steps {
 
   // ── Canvas / Drawing ────────────────────────────────────────
 
+  /** Fill a rectangle on the image with a solid color. */
   fillRect(
     x1: number,
     y1: number,
@@ -236,6 +271,7 @@ export class Steps {
     return this.addStep({ fill_rect: { x1, y1, x2, y2, color } });
   }
 
+  /** Expand the canvas by adding padding on each side. */
   expandCanvas(
     edges: { left?: number; top?: number; right?: number; bottom?: number },
     color: Color,
@@ -251,6 +287,7 @@ export class Steps {
     });
   }
 
+  /** Create a blank canvas with a solid color fill. */
   createCanvas(
     w: number,
     h: number,
@@ -260,6 +297,7 @@ export class Steps {
     return this.addStep({ create_canvas: { w, h, format, color } });
   }
 
+  /** Round the corners of the image. */
   roundImageCorners(radius: number, backgroundColor?: Color): this {
     return this.addStep({
       round_image_corners: { radius, background_color: backgroundColor },
@@ -268,6 +306,7 @@ export class Steps {
 
   // ── Watermark ───────────────────────────────────────────────
 
+  /** Overlay a watermark image with optional gravity, fit, and opacity settings. */
   watermark(
     source: IOSource,
     options?: {
@@ -299,64 +338,78 @@ export class Steps {
     return this;
   }
 
+  /** Add a small red dot watermark (for testing). */
   watermarkRedDot(): this {
     return this.addStep('watermark_red_dot');
   }
 
   // ── Color Filters ───────────────────────────────────────────
 
+  /** Invert all colors. */
   colorFilterInvert(): this {
     return this.addStep({ color_filter_srgb: 'invert' });
   }
 
+  /** Convert to grayscale using NTSC/Rec.601 luma weights. */
   colorFilterGrayscaleNtsc(): this {
     return this.addStep({ color_filter_srgb: 'grayscale_ntsc' });
   }
 
+  /** Convert to grayscale using flat (equal) channel weights. */
   colorFilterGrayscaleFlat(): this {
     return this.addStep({ color_filter_srgb: 'grayscale_flat' });
   }
 
+  /** Convert to grayscale using BT.709 luma weights. */
   colorFilterGrayscaleBt709(): this {
     return this.addStep({ color_filter_srgb: 'grayscale_bt709' });
   }
 
+  /** Convert to grayscale using R-Y luma weights. */
   colorFilterGrayscaleRY(): this {
     return this.addStep({ color_filter_srgb: 'grayscale_ry' });
   }
 
+  /** Apply a sepia tone filter. */
   colorFilterSepia(): this {
     return this.addStep({ color_filter_srgb: 'sepia' });
   }
 
+  /** Adjust alpha channel (0.0 = transparent, 1.0 = opaque). */
   colorFilterAlpha(value: number): this {
     return this.addStep({ color_filter_srgb: { alpha: value } });
   }
 
+  /** Adjust brightness (1.0 = unchanged). */
   colorFilterBrightness(value: number): this {
     return this.addStep({ color_filter_srgb: { brightness: value } });
   }
 
+  /** Adjust contrast (1.0 = unchanged). */
   colorFilterContrast(value: number): this {
     return this.addStep({ color_filter_srgb: { contrast: value } });
   }
 
+  /** Adjust saturation (1.0 = unchanged, 0.0 = grayscale). */
   colorFilterSaturation(value: number): this {
     return this.addStep({ color_filter_srgb: { saturation: value } });
   }
 
+  /** Apply a custom sRGB color matrix transformation. */
   colorMatrixSrgb(matrix: number[][]): this {
     return this.addStep({ color_matrix_srgb: { matrix } });
   }
 
   // ── Misc ────────────────────────────────────────────────────
 
+  /** Apply automatic white balance using a histogram area threshold. */
   whiteBalance(threshold: number): this {
     return this.addStep({
       white_balance_histogram_area_threshold_srgb: { threshold },
     });
   }
 
+  /** Execute an imageflow command string (IR4 query syntax). */
   command(value: string): this {
     return this.addStep({
       command_string: { kind: 'ir4', value },
@@ -365,6 +418,7 @@ export class Steps {
 
   // ── Branching ───────────────────────────────────────────────
 
+  /** Branch the pipeline: run a callback that can add nodes, then restore the insertion point. */
   branch(fn: (steps: Steps) => void): this {
     const saved = this.last;
     fn(this);
@@ -372,6 +426,7 @@ export class Steps {
     return this;
   }
 
+  /** Draw another image at exact pixel coordinates onto the current canvas. */
   drawImageExactTo(
     fn: (steps: Steps) => void,
     coordinates: { x: number; y: number; w: number; h: number },
@@ -392,6 +447,7 @@ export class Steps {
     return this;
   }
 
+  /** Copy a rectangle from another image onto the current canvas. */
   copyRectToCanvas(
     fn: (steps: Steps) => void,
     coordinates: { x: number; y: number; w: number; h: number },
@@ -421,6 +477,7 @@ export class Steps {
 
   // ── Execution ───────────────────────────────────────────────
 
+  /** Run the pipeline and return results with named output buffers. */
   async execute(): Promise<ExecuteResult> {
     this.requireDecode();
     const job = new NativeJob();

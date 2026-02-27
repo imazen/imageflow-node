@@ -5,7 +5,6 @@ native/index.node
 test
 .yarn/releases/yarn-1.19.0.js
 native/artifacts.json
-README.md
 .yarnrc.yml
 .yarn
 .github
@@ -15,5 +14,8 @@ tsconfig.json
 docs/
 yarn-error.log
 .prettierrc
+vitest.config.ts
+typedoc.json
+jest.config.js
 **/*.log
 **/*.jpg

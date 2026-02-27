@@ -1,0 +1,9 @@
+{
+  "entryPoints": ["lib/index.ts"],
+  "out": "docs",
+  "name": "@imazen/imageflow",
+  "readme": "README.md",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true
+}

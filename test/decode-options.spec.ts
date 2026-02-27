@@ -1,4 +1,4 @@
-import { DecodeOptions } from '../dist/index.js';
+import { DecodeOptions } from '../lib/index.js';
 
 describe('DecodeOptions', () => {
   it('should build empty commands list', () => {

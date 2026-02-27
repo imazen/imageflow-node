@@ -1,6 +1,11 @@
 import type { IoDirection } from '../schema/enums.js';
 import type { IOSource, IODestination } from './types.js';
 
+/**
+ * URL-based IO adapter.
+ *
+ * As a source, fetches the URL via HTTP GET. As a destination, POSTs the encoded bytes.
+ */
 export class FromURL implements IOSource, IODestination {
   private id = -1;
   private direction: IoDirection = 'in';

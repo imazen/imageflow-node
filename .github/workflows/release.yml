@@ -39,10 +39,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
@@ -52,28 +52,15 @@ jobs:
           targets: ${{ matrix.rust-target || '' }}
 
       - name: Cache Cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             native/target
-          key: ${{ runner.os }}-${{ matrix.rust-target || 'native' }}-cargo-release-${{ hashFiles('native/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ matrix.rust-target || 'native' }}-cargo-release-${{ hashFiles('native/Cargo.toml') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.rust-target || 'native' }}-cargo-release-
-
-      - name: Install LLVM (Linux)
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y llvm libclang-dev
-
-      - name: Install LLVM (Windows)
-        if: runner.os == 'Windows'
-        run: choco install -y llvm
-
-      - name: Set LLVM path (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: echo "LIBCLANG_PATH=C:\Program Files\LLVM\bin" >> $GITHUB_ENV
+            ${{ runner.os }}-${{ runner.arch }}-${{ matrix.rust-target || 'native' }}-cargo-release-
 
       - name: Build native module (release, cross-compile)
         if: matrix.rust-target

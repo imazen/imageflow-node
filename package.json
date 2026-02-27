@@ -21,17 +21,18 @@
     "node": ">=20"
   },
   "scripts": {
-    "spec": "node --experimental-vm-modules node_modules/.bin/jest",
-    "test": "npm run spec",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "install": "node scripts/download.js",
-    "build": "tsc"
+    "build": "tsc",
+    "docs": "typedoc"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
     "@types/node": "^20.0.0",
-    "jest": "^29.0.0",
-    "ts-jest": "^29.0.0",
-    "typescript": "^5.0.0"
+    "typedoc": "^0.28.17",
+    "typescript": "^5.0.0",
+    "vite-plugin-doctest": "^1.1.1",
+    "vitest": "^4.0.18"
   },
   "homepage": "https://github.com/imazen/imageflow-node#readme",
   "directories": {

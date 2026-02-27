@@ -1,0 +1,92 @@
+name: Rebuild on Imageflow Release
+
+on:
+  # Trigger manually or via repository_dispatch from imageflow repo
+  repository_dispatch:
+    types: [imageflow-release]
+  workflow_dispatch:
+    inputs:
+      imageflow_tag:
+        description: 'Imageflow release tag (e.g. v2.3.0-rc01). Leave blank to use latest.'
+        required: false
+  schedule:
+    # Check weekly for new imageflow releases
+    - cron: '0 9 * * 1'
+
+jobs:
+  check-and-rebuild:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Get current imageflow tag
+        id: current
+        run: |
+          tag=$(grep -oP 'tag = "\K[^"]+' native/Cargo.toml | head -1)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Current tag: $tag"
+
+      - name: Get latest imageflow release tag
+        id: latest
+        run: |
+          if [[ -n "${{ github.event.inputs.imageflow_tag }}" ]]; then
+            tag="${{ github.event.inputs.imageflow_tag }}"
+          elif [[ -n "${{ github.event.client_payload.tag }}" ]]; then
+            tag="${{ github.event.client_payload.tag }}"
+          else
+            tag=$(gh api repos/imazen/imageflow/releases/latest --jq '.tag_name' 2>/dev/null || echo "")
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Latest tag: $tag"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if update needed
+        id: check
+        run: |
+          if [[ -z "${{ steps.latest.outputs.tag }}" ]]; then
+            echo "No latest tag found, skipping"
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ steps.current.outputs.tag }}" == "${{ steps.latest.outputs.tag }}" ]]; then
+            echo "Already on latest (${{ steps.current.outputs.tag }}), skipping"
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Update needed: ${{ steps.current.outputs.tag }} -> ${{ steps.latest.outputs.tag }}"
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update Cargo.toml tag
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          sed -i "s/tag = \"${{ steps.current.outputs.tag }}\"/tag = \"${{ steps.latest.outputs.tag }}\"/g" native/Cargo.toml
+          echo "Updated native/Cargo.toml:"
+          grep 'tag =' native/Cargo.toml
+
+      - name: Setup Rust
+        if: steps.check.outputs.needed == 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Verify it builds
+        if: steps.check.outputs.needed == 'true'
+        working-directory: native
+        run: cargo check
+
+      - name: Create PR
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          branch="deps/imageflow-${{ steps.latest.outputs.tag }}"
+          git checkout -b "$branch"
+          git add native/Cargo.toml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "deps: update imageflow to ${{ steps.latest.outputs.tag }}"
+          git push origin "$branch"
+          gh pr create \
+            --title "deps: update imageflow to ${{ steps.latest.outputs.tag }}" \
+            --body "Automatic update from ${{ steps.current.outputs.tag }} to ${{ steps.latest.outputs.tag }}." \
+            --label dependencies
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

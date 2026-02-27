@@ -1,5 +1,5 @@
 import * as fs from 'node:fs';
-import { Pipeline, FromBuffer, DecodeOptions, presets } from '../dist/index.js';
+import { Pipeline, FromBuffer, DecodeOptions, presets } from '../lib/index.js';
 
 const testJpg = fs.readFileSync('./test/test.jpg');
 

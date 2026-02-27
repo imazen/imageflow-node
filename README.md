@@ -1,213 +1,176 @@
-# Node bindings for [Imageflow](https://github.com/imazen/imageflow)
+# @imazen/imageflow
 
-[![Macos](https://github.com/imazen/imageflow-node/workflows/Test%20Macos/badge.svg)](https://github.com/imazen/imageflow-node/actions?query=workflow%3A%22Test+Macos%22) [![Linux](https://github.com/imazen/imageflow-node/workflows/Test%20Linux/badge.svg)](https://github.com/imazen/imageflow-node/actions?query=workflow%3A%22Test+Linux%22) [![Windows](https://github.com/imazen/imageflow-node/workflows/Test%20Windows/badge.svg)](https://github.com/imazen/imageflow-node/actions?query=workflow%3A%22Test+Windows%22)
+[![CI](https://github.com/imazen/imageflow-node/actions/workflows/ci.yml/badge.svg)](https://github.com/imazen/imageflow-node/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@imazen/imageflow)](https://www.npmjs.com/package/@imazen/imageflow)
+[![license](https://img.shields.io/npm/l/@imazen/imageflow)](https://github.com/imazen/imageflow-node/blob/main/LICENSE)
 
-Quickly scale or modify images and optimize them for the web.
+Node.js bindings for [Imageflow](https://github.com/imazen/imageflow), a fast image optimization and manipulation library.
 
-If the AGPLv3 does not work for you, you can get a [commercial license](https://imageresizing.net/pricing) on a sliding scale. If you have more than 1 server doing image processing your savings should cover the cost.
+Supports Linux (x64, arm64), macOS (x64, Apple Silicon), and Windows (x64, arm64). Prebuilt native binaries are downloaded automatically on install.
 
-[API docs are here](https://imazen.github.io/imageflow-node/).
+[API docs](https://imazen.github.io/imageflow-node/) | [Imageflow](https://github.com/imazen/imageflow)
 
-## Installation
+## Install
 
 ```bash
 npm install @imazen/imageflow
 ```
 
-## Usage
+Requires Node.js 18+. ESM only.
 
-```js
-const {
-    MozJPEG,
-    Steps,
-    FromURL,
-    FromFile,
-    FromStream,
-    FromBuffer,
-} = require('@imazen/imageflow')
-const fs = require('fs')
+## Quick start
 
-let step = new Steps(new FromURL('https://jpeg.org/images/jpeg2000-home.jpg'))
-    .constrainWithin(500, 500)
-    .branch((step) =>
-        step
-            .constrainWithin(400, 400)
-            .branch((step) =>
-                step
-                    .constrainWithin(200, 200)
-                    .rotate90()
-                    .colorFilterGrayscaleFlat()
-                    .encode(new FromFile('./branch_2.jpg'), new MozJPEG(80))
-            )
-            .copyRectangle(
-                (canvas) =>
-                    canvas.decode(
-                        new FromStream(fs.createReadStream('./test.jpg'))
-                    ),
-                { x: 0, y: 0, w: 100, h: 100 },
-                10,
-                10
-            )
-            .encode(new FromFile('./branch.jpg'), new MozJPEG(80))
-    )
-    .constrainWithin(100, 100)
-    .rotate180()
-step.encode(new FromBuffer(null, 'key'), new MozJPEG(80))
-    .execute()
-    .then(console.log)
-    .catch(console.log)
+```ts
+import { Steps, FromFile, FromBuffer, presets } from '@imazen/imageflow';
+
+// Resize an image file
+await new Steps(new FromFile('input.jpg'))
+  .constrainWithin(800, 600)
+  .encode(new FromFile('output.jpg'), presets.mozjpeg(80))
+  .execute();
 ```
 
-### Examples
+## Examples
 
-1. Reading a file from disk. `FromFile` provide an easy method for reading and writing images to disk.
+### Resize and encode to buffer
 
-```js
-const { MozJPEG, Steps, FromFile } = require('@imazen/imageflow')
+```ts
+import { Steps, FromBuffer, presets } from '@imazen/imageflow';
 
-const output = await new Step(new FromFile('path/to/file'))
-    .rotate180()
-    .encode(new FromFile('./path/to/output/file'))
-    .execute()
+const result = await new Steps(new FromBuffer(inputBytes))
+  .constrainWithin(400, 400)
+  .toBuffer(presets.mozjpeg(85), 'result')
+  .execute();
+
+const outputBytes = result.buffers.get('result');
 ```
 
-2. Reading from a stream. `FromStream` can read and write to a stream.
+### Stream processing
 
-```js
-const { MozJPEG, Steps, FromStream } = require('@imazen/imageflow')
+```ts
+import { Steps, FromStream, presets } from '@imazen/imageflow';
+import { createReadStream, createWriteStream } from 'fs';
 
-const output = await new Step(new FromStream(req))
+await new Steps(new FromStream(createReadStream('photo.png')))
+  .constrainWithin(1200, 1200)
+  .toStream(presets.webpLossy(80), createWriteStream('photo.webp'))
+  .execute();
+```
+
+### Fetch from URL
+
+```ts
+import { Steps, FromURL, FromFile, presets } from '@imazen/imageflow';
+
+await new Steps(new FromURL('https://example.com/photo.jpg'))
+  .constrainWithin(500, 500)
+  .colorFilterGrayscaleFlat()
+  .encode(new FromFile('gray.webp'), presets.webpLossy(75))
+  .execute();
+```
+
+### Decode options
+
+```ts
+import { Steps, FromBuffer, DecodeOptions, presets } from '@imazen/imageflow';
+
+const result = await new Steps(
+  new FromBuffer(jpegBytes),
+  new DecodeOptions()
+    .setJpegDownscaleHint(200, 200)
+    .discardColorProfile()
+)
+  .constrainWithin(200, 200)
+  .toBuffer(presets.mozjpeg(80), 'thumb')
+  .execute();
+```
+
+### Branching (multiple outputs from one decode)
+
+```ts
+import { Steps, FromFile, presets } from '@imazen/imageflow';
+
+await new Steps(new FromFile('original.jpg'))
+  .constrainWithin(1200, 1200)
+  .branch(s => s.encode(new FromFile('large.jpg'), presets.mozjpeg(85)))
+  .branch(s => s
     .constrainWithin(400, 400)
-    .encode(new FromStream(res))
-    .execute()
-res.end()
+    .encode(new FromFile('medium.jpg'), presets.mozjpeg(80))
+  )
+  .branch(s => s
+    .constrainWithin(150, 150)
+    .encode(new FromFile('thumb.jpg'), presets.mozjpeg(70))
+  )
+  .execute();
 ```
 
-3. Reading from a url. `FromURL` can make a GET request to download and POST request to upload the image.
+### Query string commands
 
-```js
-const { MozJPEG, Steps, FromURL } = require('@imazen/imageflow')
+For simple resize/format operations without the builder API:
 
-const output = await new Step(new FromURL('url to image'))
-    .colorFilterGrayscaleFlat()
-    .encode(new FromURL('url to image upload'))
-    .execute()
-```
+```ts
+import { Steps, FromBuffer, presets } from '@imazen/imageflow';
 
-4. Providing buffer. `FromBuffer` can read and provide the output buffer. To read the output a key should be provided, which used later to access buffer in the output.
-
-```js
-const { MozJPEG, Steps, FromBuffer } = require('@imazen/imageflow')
-
-const output = await new Step(new FromBuffer(getSomeBuffer()))
-    .colorFilterGrayscaleFlat()
-    .encode(new FromBuffer(null, 'key'))
-    .execute()
-console.log(output.key)
-```
-
-5. Performing Batch operations. `branch`, `decode`, and `encode` are used together to perform batch operation. This example shows how to create varying size images from a single image.
-
-```js
-const { MozJPEG, Steps, FromStream, FromFile } = require('@imazen/imageflow')
-
-const test = new Steps(new FromStream(req))
-    .constrainWithin(800, 800)
-    .branch((step) => step.encode(new FromFile('large.jpg'), new MozJPEG()))
-    .branch((step) =>
-        step
-            .constrainWithin(400, 400)
-            .branch((step) =>
-                step
-                    .constrainWithin(200, 200)
-                    .branch((step) =>
-                        step
-                            .constrainWithin(100, 100)
-                            .encode(new FromFile('tiny.jpg'), new MozJPEG())
-                    )
-                    .encode(new FromFile('small.jpg'), new MozJPEG())
-            )
-            .encode(new FromFile('medium.jpg'), new MozJPEG())
-    )
-    .execute()
-```
-
-6. Example with complex graph of operations
-
-```js
-const {
-    MozJPEG,
-    Steps,
-    FromURL,
-    FromFile,
-    FromStream,
-    FromBuffer,
-} = require('@imazen/imageflow')
-const fs = require('fs')
-
-let step = new Steps(new FromURL('https://jpeg.org/images/jpeg2000-home.jpg'))
-    .constraintWithin(500, 500)
-    .branch((step) =>
-        step
-            .constraintWithin(400, 400)
-            .branch((step) =>
-                step
-                    .constraintWithin(200, 200)
-                    .rotate90()
-                    .colorFilterGrayscaleFlat()
-                    .encode(new FromFile('./branch_2.jpg'), new MozJPEG(80))
-            )
-            .copyRectangle(
-                (canvas) =>
-                    canvas.decode(
-                        new FromStream(fs.createReadStream('./test.jpg'))
-                    ),
-                { x: 0, y: 0, w: 100, h: 100 },
-                10,
-                10
-            )
-            .encode(new FromFile('./branch.jpg'), new MozJPEG(80))
-    )
-    .constraintWithin(100, 100)
-    .rotate180()
-step.encode(new FromBuffer(null, 'key'), new MozJPEG(80))
-    .execute()
-    .then(console.log)
-    .catch(console.log)
-```
-
-7. Using query style commands
-
-```js
 await new Steps().executeCommand(
-    'width=100&height=100&mode=max',
-    new FromBuffer(str),
-    new FromBuffer(null, 'key')
-)
+  'width=200&height=200&mode=max&format=webp',
+  new FromBuffer(inputBytes),
+  new FromBuffer(null, 'out')
+);
 ```
 
-8. Using Decode Options
+## Encoder presets
 
-```js
-const output = await new Step(
-    new FromBuffer(getSomeBuffer()),
-    new DecodeOptions()
-        .ignoreColorProfileError()
-        .setJPEGDownscaleHint(100, 100)
-        .setWebpDecoderHints(100, 100)
-        .discardColorProfile()
-)
-    .colorFilterGrayscaleFlat()
-    .encode(new FromBuffer(null, 'key'))
-    .execute()
-console.log(output.key)
+```ts
+import { presets } from '@imazen/imageflow';
+
+presets.mozjpeg(quality, { progressive?: boolean })
+presets.libjpegTurbo(quality, { progressive?: boolean })
+presets.webpLossy(quality)
+presets.webpLossless()
+presets.lodepng({ maxDeflate?: boolean })
+presets.pngquant({ quality?: [min, max], speed?: number })
+presets.libpng({ maxDeflate?: boolean, matte?: Color })
+presets.gif()
 ```
 
-## Local Setup
+## Available operations
+
+Fluent methods on `Steps`:
+
+- `constrainWithin(w, h)` — scale down to fit
+- `encode(dest, preset)` / `toFile(preset, path)` / `toBuffer(preset, key)` / `toStream(preset, stream)`
+- `rotate90()` / `rotate180()` / `rotate270()`
+- `flipVertical()` / `flipHorizontal()`
+- `crop(x1, y1, x2, y2)` / `cropWhitespace(threshold, padding)`
+- `region(...)` / `regionPercent(...)`
+- `expandCanvas(...)` / `fillRect(...)`
+- `colorFilterGrayscaleFlat()` / `colorFilterSepia()` / `colorFilterInvert()` and others
+- `colorFilterBrightness(v)` / `colorFilterContrast(v)` / `colorFilterSaturation(v)` / `colorFilterAlpha(v)`
+- `whiteBalance(threshold)`
+- `watermark(source, gravity, fitPercent, opacity, fitBox?)`
+- `branch(fn)` — fork the pipeline for multiple outputs
+- `copyRectToCanvas(...)` / `drawImageExactTo(...)`
+
+See the [API docs](https://imazen.github.io/imageflow-node/) for full details.
+
+## License
+
+[AGPLv3](https://github.com/imazen/imageflow-node/blob/main/LICENSE). Commercial licenses available at [imageresizing.net/pricing](https://imageresizing.net/pricing).
+
+## Development
 
 ```bash
 git clone https://github.com/imazen/imageflow-node
 cd imageflow-node
-yarn
-yarn test
+npm install
+npm test          # vitest — 110 tests including doctest examples
+npm run docs      # typedoc — generates API reference in docs/
+```
+
+Native module build (requires Rust toolchain):
+
+```bash
+cd native
+cargo build
+cp target/debug/libimageflow_node.so index.node  # .dylib on macOS, .dll on Windows
 ```

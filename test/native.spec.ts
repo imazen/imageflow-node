@@ -1,4 +1,4 @@
-import { NativeJob, getLongVersionString } from '../dist/index.js';
+import { NativeJob, getLongVersionString } from '../lib/index.js';
 
 // 1x1 PNG pixel
 const PNG_1x1 = Buffer.from([
