@@ -19,8 +19,9 @@ jobs:
             lib-name: libimageflow_node.dylib
           - os: windows-latest
             lib-name: imageflow_node.dll
-          - os: windows-11-arm
-            lib-name: imageflow_node.dll
+          # windows-11-arm: blocked — mozjpeg-sys NEON assembly (.S)
+          # uses GNU as syntax which MSVC cl.exe can't compile.
+          # Needs upstream fix in mozjpeg-sys to use clang-cl or MASM.
 
     runs-on: ${{ matrix.os }}
 
