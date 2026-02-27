@@ -20,3 +20,5 @@ yarn-1.19.0.js$
 (?:^|/)dist/
 (?:^|/)__snapshots__/
 ^\.github/workflows/
+^\.npmignore$
+^LICENSE$
