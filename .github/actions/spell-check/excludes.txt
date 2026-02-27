@@ -20,6 +20,8 @@ yarn-1.19.0.js$
 (?:^|/)dist/
 (?:^|/)lib/
 (?:^|/)__snapshots__/
+(?:^|/)native/
+^package-lock\.json$
 ^\.github/workflows/
 ^\.npmignore$
 ^LICENSE$
