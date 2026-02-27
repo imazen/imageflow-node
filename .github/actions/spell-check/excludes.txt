@@ -19,3 +19,4 @@ yarn-1.19.0.js$
 (?:^|/)node_modules/
 (?:^|/)dist/
 (?:^|/)__snapshots__/
+^\.github/workflows/
