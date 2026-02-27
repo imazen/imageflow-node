@@ -19,9 +19,8 @@ jobs:
             lib-name: libimageflow_node.dylib
           - os: windows-latest
             lib-name: imageflow_node.dll
-          # windows-11-arm: blocked — mozjpeg-sys NEON assembly (.S)
-          # uses GNU as syntax which MSVC cl.exe can't compile.
-          # Needs upstream fix in mozjpeg-sys to use clang-cl or MASM.
+          - os: windows-11-arm
+            lib-name: imageflow_node.dll
 
     runs-on: ${{ matrix.os }}
 
@@ -46,19 +45,6 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-cargo-${{ hashFiles('native/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ runner.arch }}-cargo-
-
-      - name: Install LLVM (Linux)
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y llvm libclang-dev
-
-      - name: Install LLVM (Windows)
-        if: runner.os == 'Windows'
-        run: choco install -y llvm
-
-      - name: Set LLVM path (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: echo "LIBCLANG_PATH=C:\Program Files\LLVM\bin" >> $GITHUB_ENV
 
       - name: Build native module
         working-directory: native
