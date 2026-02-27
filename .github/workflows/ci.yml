@@ -11,11 +11,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             lib-name: libimageflow_node.so
           - os: macos-latest
             lib-name: libimageflow_node.dylib
+          - os: macos-15-intel
+            lib-name: libimageflow_node.dylib
           - os: windows-latest
+            lib-name: imageflow_node.dll
+          - os: windows-11-arm
             lib-name: imageflow_node.dll
 
     runs-on: ${{ matrix.os }}
@@ -38,9 +42,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             native/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('native/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-cargo-${{ hashFiles('native/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-
+            ${{ runner.os }}-${{ runner.arch }}-cargo-
 
       - name: Install LLVM (Linux)
         if: runner.os == 'Linux'
@@ -76,3 +80,26 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  publish-dry-run:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Publish dry-run (verify OIDC + provenance)
+        run: npm publish --access public --provenance --dry-run
