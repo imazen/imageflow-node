@@ -22,3 +22,5 @@ yarn-1.19.0.js$
 ^\.github/workflows/
 ^\.npmignore$
 ^LICENSE$
+^README\.md$
+^\.editorconfig$
